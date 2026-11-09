@@ -929,3 +929,16 @@ a.halaman__item:hover { border-color: var(--hijau); color: var(--hijau); }
 .csr-info > div:last-child { border-bottom: 0; padding-bottom: 0; }
 .csr-info dt { font-size: 0.75rem; color: var(--teks-redup); margin-bottom: 2px; }
 .csr-info dd { font-weight: 600; font-size: 0.9375rem; }
+
+/* ===== Jaringan kantor ===== */
+.lencana--kantor-kantor-pusat { background: #c9890a; }
+.lencana--kantor-kantor-cabang { background: var(--hijau); }
+.lencana--kantor-kantor-kas { background: #4b6b8a; }
+.kantor-ringkas { list-style: none; display: grid; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--garis); font-size: 0.8125rem; color: var(--teks-redup); }
+.kantor-ringkas span { color: var(--hijau); margin-right: 4px; }
+.jam-daftar { list-style: none; display: grid; gap: 8px; max-width: 460px; }
+.jam-daftar li { padding: 10px 14px; background: var(--latar); border: 1px solid var(--garis); border-radius: 10px; font-size: 0.9375rem; font-weight: 600; }
+.csr-info a { color: var(--hijau); }
+.csr-info a:hover { text-decoration: underline; }
+.tombol-aksi--garis { background: transparent; color: var(--hijau); border: 2px solid var(--hijau); margin-top: 12px; }
+.tombol-aksi--garis:hover { background: #eef6f4; }

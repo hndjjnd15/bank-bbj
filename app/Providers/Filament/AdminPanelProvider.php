@@ -7,6 +7,7 @@ use App\Filament\Resources\DokumenPpids\DokumenPpidResource;
 use App\Filament\Resources\LaporanPelanggarans\LaporanPelanggaranResource;
 use App\Filament\Resources\LaporanTahunans\LaporanTahunanResource;
 use App\Filament\Resources\LaporanTriwulans\LaporanTriwulanResource;
+use App\Filament\Resources\KantorCabangs\KantorCabangResource;
 use App\Filament\Resources\Lelangs\LelangsResource;
 use App\Filament\Resources\Lowongans\LowonganResource;
 use App\Filament\Resources\PemegangSahams\PemegangSahamResource;
@@ -113,6 +114,7 @@ class AdminPanelProvider extends PanelProvider
                                 ...PengurusPerusahaanResource::getNavigationItems(),
                                 ...LaporanTriwulanResource::getNavigationItems(),
                                 ...LaporanTahunanResource::getNavigationItems(),
+                                ...KantorCabangResource::getNavigationItems(),
                                 ...ProgramCsrResource::getNavigationItems(),
                             ]),
                     ]);

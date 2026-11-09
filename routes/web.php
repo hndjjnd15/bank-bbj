@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\KarirController;
 use App\Http\Controllers\CsrController;
+use App\Http\Controllers\KantorController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\LelangController;
 use App\Http\Controllers\PengaduanController;
@@ -26,6 +27,10 @@ Route::get('/berita/{slug}', [BeritaController::class, 'show']);
 // Lelang & AYDA: pola yang sama dengan berita
 Route::get('/lelang', [LelangController::class, 'index']);
 Route::get('/lelang/{slug}', [LelangController::class, 'show']);
+
+// Jaringan kantor: daftar dan detail
+Route::get('/jaringan-kantor', [KantorController::class, 'index']);
+Route::get('/jaringan-kantor/{slug}', [KantorController::class, 'show']);
 
 // Program CSR: daftar dan detail
 Route::get('/csr', [CsrController::class, 'index']);
