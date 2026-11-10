@@ -12,6 +12,8 @@ use App\Filament\Resources\Lelangs\LelangsResource;
 use App\Filament\Resources\Lowongans\LowonganResource;
 use App\Filament\Resources\PemegangSahams\PemegangSahamResource;
 use App\Filament\Resources\Pengaduans\PengaduanResource;
+use App\Filament\Resources\ProdukBanks\ProdukBankResource;
+use App\Filament\Resources\SukuBungaDepositos\SukuBungaDepositoResource;
 use App\Filament\Resources\PengurusPerusahaans\PengurusPerusahaanResource;
 use App\Filament\Resources\PermohonanInformasis\PermohonanInformasiResource;
 use App\Filament\Resources\ProfilPerusahaans\ProfilPerusahaanResource;
@@ -91,6 +93,15 @@ class AdminPanelProvider extends PanelProvider
                                 ...PengaduanResource::getNavigationItems(),
                                 ...LaporanPelanggaranResource::getNavigationItems(),
                                 ...PermohonanInformasiResource::getNavigationItems(),
+                            ]),
+
+                        // Sejajar dengan menu "Produk" di website
+                        NavigationGroup::make('Produk')
+                            ->icon(Heroicon::OutlinedBanknotes)
+                            ->collapsed()
+                            ->items([
+                                ...ProdukBankResource::getNavigationItems(),
+                                ...SukuBungaDepositoResource::getNavigationItems(),
                             ]),
  
                         // Sejajar dengan menu "Informasi" di website

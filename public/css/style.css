@@ -942,3 +942,73 @@ a.halaman__item:hover { border-color: var(--hijau); color: var(--hijau); }
 .csr-info a:hover { text-decoration: underline; }
 .tombol-aksi--garis { background: transparent; color: var(--hijau); border: 2px solid var(--hijau); margin-top: 12px; }
 .tombol-aksi--garis:hover { background: #eef6f4; }
+
+/* ===== Produk (deposito) ===== */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.produk { max-width: 1152px; margin: 0 auto; }
+.produk__hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.produk__teks h1 { margin-bottom: 10px; font-size: clamp(1.75rem, 3.6vw, 2.75rem); }
+.produk__tagline { font-size: 1.125rem; font-weight: 600; color: var(--teks); margin-bottom: 16px; line-height: 1.5; }
+.produk__isi { color: var(--teks-redup); line-height: 1.85; margin-bottom: 14px; font-size: 0.9688rem; }
+.produk__aksi { justify-content: flex-start; }
+.produk__foto { aspect-ratio: 4 / 3; border-radius: 20px; overflow: hidden; background: var(--hijau); box-shadow: 0 18px 44px rgba(15, 76, 69, .22); }
+.produk__foto > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.produk__bagian { margin-top: 64px; }
+
+.produk__fakta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
+.produk__fakta > div { background: var(--latar); border: 1px solid var(--garis); border-top: 4px solid var(--emas); border-radius: 14px; padding: 18px 20px; }
+.produk__fakta span { display: block; font-size: 0.75rem; color: var(--teks-redup); margin-bottom: 4px; }
+.produk__fakta strong { font-size: 1.25rem; color: var(--hijau); }
+
+.produk__keunggulan { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.produk__unggul { display: flex; gap: 14px; align-items: flex-start; background: var(--latar); border: 1px solid var(--garis); border-radius: 14px; padding: 18px; }
+.produk__unggul span { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--hijau); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 0.875rem; }
+.produk__unggul p { font-size: 0.9375rem; line-height: 1.55; }
+
+.tabel-bunga { min-width: 560px; }
+.tabel-bunga td { font-weight: 600; }
+.produk__catatan { margin-top: 16px; font-size: 0.8125rem; color: var(--teks-redup); line-height: 1.65; text-align: center; max-width: 80ch; margin-left: auto; margin-right: auto; }
+
+/* Kalkulator */
+.kalkulator { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: stretch; }
+.kalkulator__form { background: var(--latar); border: 1px solid var(--garis); border-radius: 18px; padding: 26px; display: grid; gap: 18px; align-content: start; box-shadow: 0 10px 30px rgba(15, 76, 69, .08); }
+.kalkulator__form .form__baris { display: grid; gap: 6px; }
+.kalkulator__form label:not(.setuju) { font-weight: 600; font-size: 0.9375rem; }
+.kalkulator__form select, .kalkulator__rp input {
+  font: inherit; width: 100%; padding: 12px 14px; border: 1px solid #c9d4d1; border-radius: 10px; background: #fff; color: var(--teks);
+}
+.kalkulator__form select:focus, .kalkulator__rp input:focus { outline: 3px solid rgba(227, 168, 43, .45); border-color: var(--emas); }
+.kalkulator__rp { display: flex; align-items: stretch; }
+.kalkulator__rp span { display: grid; place-items: center; padding: 0 14px; background: #eef3f2; border: 1px solid #c9d4d1; border-right: 0; border-radius: 10px 0 0 10px; font-weight: 700; color: var(--hijau); }
+.kalkulator__rp input { border-radius: 0 10px 10px 0; font-weight: 700; font-size: 1.0625rem; }
+.kalkulator__form .setuju input { width: auto; }
+
+.kalkulator__hasil { background: linear-gradient(150deg, var(--hijau-tua), #1d7a6c); color: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 14px 38px rgba(15, 76, 69, .28); }
+.kalkulator__label { font-size: 0.8125rem; opacity: .85; }
+.kalkulator__total { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 800; line-height: 1.2; margin: 6px 0 20px; color: #ffd98a; overflow-wrap: anywhere; }
+.kalkulator__rincian { display: grid; gap: 0; }
+.kalkulator__rincian > div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, .18); font-size: 0.9375rem; }
+.kalkulator__rincian > div:last-child { border-bottom: 0; }
+.kalkulator__rincian dt { opacity: .85; }
+.kalkulator__rincian dd { font-weight: 700; text-align: right; }
+.kalkulator__pesan { padding: 14px 16px; border-radius: 10px; background: rgba(255, 255, 255, .14); font-size: 0.9375rem; line-height: 1.55; margin-bottom: 16px; }
+.kalkulator__pesan[hidden] { display: none; }
+.kalkulator__hasil [hidden] { display: none; }
+
+/* Flyer */
+.galeri--flyer { max-width: 560px; margin: 0 auto; }
+
+/* Ajakan */
+.produk__ajakan { text-align: center; background: linear-gradient(150deg, var(--hijau-tua), #1d7a6c); color: #fff; border-radius: 22px; padding: 44px 24px; }
+.produk__ajakan h2 { font-size: clamp(1.375rem, 3vw, 1.875rem); margin-bottom: 8px; }
+.produk__ajakan p { opacity: .9; }
+.produk__ajakan .ppid__tombol { background: var(--emas); border-color: var(--emas); color: #2b2100; }
+.produk__ajakan .ppid__tombol:hover { background: #cf941a; border-color: #cf941a; }
+.produk__ajakan .ppid__tombol--garis { background: transparent; border-color: #fff; color: #fff; }
+.produk__ajakan .ppid__tombol--garis:hover { background: rgba(255, 255, 255, .14); border-color: #fff; color: #fff; }
+
+@media (max-width: 900px) {
+  .produk__hero { grid-template-columns: 1fr; gap: 28px; }
+  .kalkulator { grid-template-columns: 1fr; }
+  .produk__bagian { margin-top: 52px; }
+}

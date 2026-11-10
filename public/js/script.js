@@ -523,6 +523,8 @@
     ".ppid__kategori > *", ".ppid__bagian",
     // profil perusahaan
     ".profil__kepala", ".profil__bagian",
+    // produk (deposito)
+    ".produk__bagian",
     // footer
     ".footer__isi > *", ".footer__bawah"
   ].join(",");
@@ -561,4 +563,99 @@
   }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
 
   daftar.forEach(function (el) { pengamat.observe(el); });
+})();
+
+/* ===== Kalkulator simulasi deposito =====
+   Data suku bunga dibaca dari <script id="data-bunga"> (dikirim controller). Perhitungan di browser, tanpa kirim data ke server.
+   Bunga bruto = nominal x bunga p.a. x (jangka waktu / 12). Pajak = PPh final atas bunga jika nominal di atas batas bebas pajak. */
+(function () {
+  const wadah = document.querySelector("[data-kalkulator]");
+  const dataEl = document.getElementById("data-bunga");
+  if (!wadah || !dataEl) return;
+
+  let rates;
+  try { rates = JSON.parse(dataEl.textContent); } catch (e) { return; }
+  if (!Array.isArray(rates) || !rates.length) return;
+
+  const pajakPersen = parseFloat(wadah.getAttribute("data-pajak")) || 0;
+  const batasPajak = parseInt(wadah.getAttribute("data-batas"), 10) || 0;
+  const q = function (s) { return wadah.querySelector(s); };
+
+  const inputNominal = q("[data-nominal]");
+  const pilihTenor = q("[data-tenor]");
+  const cekPajak = q("[data-pakai-pajak]");
+  const pesan = q("[data-pesan]");
+  const hasil = q("[data-hasil]");
+  const el = {
+    total: q("[data-total]"),
+    bunga: q("dd[data-bunga]"),
+    bruto: q("dd[data-bruto]"),
+    pajak: q("dd[data-pajak]"),
+    bersih: q("dd[data-bersih]"),
+    perbulan: q("dd[data-perbulan]")
+  };
+
+  const titik = function (n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); };
+  const rp = function (n) { return "Rp " + titik(n); };
+  const persen = function (n) { return n.toFixed(2).replace(".", ",") + "%"; };
+  const angka = function (s) { return parseInt(String(s).replace(/\D/g, ""), 10) || 0; };
+  const minimal = Math.min.apply(null, rates.map(function (r) { return r.min; }));
+
+  function tampilPesan(teks) {
+    pesan.textContent = teks;
+    pesan.hidden = false;
+    hasil.hidden = true;
+  }
+
+  function hitung() {
+    const nominal = angka(inputNominal.value);
+    const tenor = parseInt(pilihTenor.value, 10);
+
+    if (nominal < minimal) {
+      tampilPesan("Nominal penempatan minimal " + rp(minimal) + ".");
+      return;
+    }
+
+    const baris = rates.find(function (r) {
+      return r.tenor === tenor && nominal >= r.min && (r.maks === null || nominal < r.maks);
+    });
+    if (!baris) {
+      tampilPesan("Suku bunga untuk nominal dan jangka waktu ini belum tersedia. Silakan hubungi kantor kami.");
+      return;
+    }
+
+    const bruto = nominal * (baris.bunga / 100) * (tenor / 12);
+    const kenaPajak = cekPajak.checked && pajakPersen > 0 && nominal > batasPajak;
+    const pajak = kenaPajak ? bruto * pajakPersen / 100 : 0;
+    const bersih = bruto - pajak;
+
+    pesan.hidden = true;
+    hasil.hidden = false;
+    el.total.textContent = rp(nominal + bersih);
+    el.bunga.textContent = persen(baris.bunga) + " p.a.";
+    el.bruto.textContent = rp(bruto);
+    el.pajak.textContent = kenaPajak ? "- " + rp(pajak) : (cekPajak.checked ? "Rp 0 (tidak dikenai pajak)" : "Tidak dihitung");
+    el.bersih.textContent = rp(bersih);
+    el.perbulan.textContent = rp(bersih / tenor);
+  }
+
+  // Format titik ribuan saat mengetik; posisi kursor dijaga
+  inputNominal.addEventListener("input", function () {
+    const kursor = inputNominal.selectionStart;
+    const digitSebelum = inputNominal.value.slice(0, kursor).replace(/\D/g, "").length;
+    const n = angka(inputNominal.value);
+    inputNominal.value = n ? titik(n) : "";
+
+    let pos = 0, hitungDigit = 0;
+    while (pos < inputNominal.value.length && hitungDigit < digitSebelum) {
+      if (/\d/.test(inputNominal.value[pos])) hitungDigit++;
+      pos++;
+    }
+    inputNominal.setSelectionRange(pos, pos);
+    hitung();
+  });
+  pilihTenor.addEventListener("change", hitung);
+  cekPajak.addEventListener("change", hitung);
+
+  hitung();
 })();

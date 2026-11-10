@@ -10,6 +10,7 @@ use App\Http\Controllers\PpidController;
 use App\Http\Controllers\WbsController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\ProdukController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,6 +24,9 @@ Route::get('/produk', function () {
 // Berita: Route -> Controller -> Model (database) -> View
 Route::get('/berita', [BeritaController::class, 'index']);
 Route::get('/berita/{slug}', [BeritaController::class, 'show']);
+
+// Produk: deposito (tabungan dan kredit menyusul)
+Route::get('/deposito', [ProdukController::class, 'deposito']);
 
 // Lelang & AYDA: pola yang sama dengan berita
 Route::get('/lelang', [LelangController::class, 'index']);

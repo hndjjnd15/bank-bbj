@@ -19,8 +19,8 @@ class ProdukBankResource extends Resource
     protected static ?string $model = ProdukBank::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-    protected static ?string $modelLabel = 'Produk Bank';
-    protected static ?string $pluralModelLabel = 'Produk Bank';
+    protected static ?string $modelLabel = 'Produk';
+    protected static ?string $pluralModelLabel = 'Produk';
 
     public static function form(Schema $schema): Schema
     {
