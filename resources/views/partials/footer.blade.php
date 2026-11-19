@@ -11,16 +11,16 @@
     <div>
       <h3>Produk</h3>
       <ul>
-        <li><a href="/tabungan">Tabungan Tamasa</a></li>
+        <li><a href="{{ route('tabungan.index') }}">Produk Tabungan</a></li>
         <li><a href="/deposito">Deposito Pikat</a></li>
-        <li><a href="/kredit/multiguna">Kredit Multiguna</a></li>
+        <li><a href="/kredit">Produk Kredit</a></li>
       </ul>
     </div>
 
     <div>
       <h3>Bantuan</h3>
       <ul>
-        <li><a href="/#faq">FAQ</a></li>
+        <li><a href="/faq">FAQ</a></li>
         <li><a href="/pengaduan">Pengaduan nasabah</a></li>
         <li><a href="/wbs">Whistleblowing (WBS)</a></li>
         <li><a href="/ppid">PPID</a></li>

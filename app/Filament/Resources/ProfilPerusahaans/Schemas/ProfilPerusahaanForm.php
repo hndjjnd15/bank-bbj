@@ -25,6 +25,7 @@ class ProfilPerusahaanForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('1. Sejarah dan Foto Gedung')
                     ->schema([
@@ -46,7 +47,7 @@ class ProfilPerusahaanForm
                     ]),
 
                 Section::make('2. Visi dan Misi')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         Textarea::make('visi')
                             ->label('Visi')

@@ -5,11 +5,13 @@ namespace App\Filament\Resources\ProdukBanks\Schemas;
 use App\Models\ProdukBank;
 use App\Support\Perataan;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
 use Illuminate\Support\Str;
@@ -21,20 +23,22 @@ class ProdukBankForm
     {
         $angka = preg_replace('/\D+/', '', (string) $state);
 
-        return $angka !== '' ? 'Preview: Rp ' . number_format((float) $angka, 0, ',', '.') : 'Ketik angka saja, titik pemisah ribuan muncul otomatis.';
+        return $angka !== '' ? 'Preview: Rp '.number_format((float) $angka, 0, ',', '.') : 'Ketik angka saja, titik pemisah ribuan muncul otomatis.';
     }
 
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('1. Identitas Produk')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         Select::make('jenis')
                             ->label('Jenis Produk')
                             ->options(ProdukBank::JENIS)
                             ->default('deposito')
+                            ->live()
                             ->required(),
 
                         Toggle::make('diterbitkan')
@@ -53,7 +57,7 @@ class ProdukBankForm
 
                         TextInput::make('slug')
                             ->label('Alamat singkat (slug)')
-                            ->helperText('Terisi otomatis dari nama produk. Halaman deposito di website selalu di alamat /deposito.')
+                            ->helperText('Terisi otomatis dari nama produk. Produk kredit menggunakan alamat /kredit/{slug}.')
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
@@ -65,7 +69,8 @@ class ProdukBankForm
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->stripCharacters('.')
                             ->live(onBlur: true)
-                            ->helperText(fn ($state) => self::preview($state)),
+                            ->helperText(fn ($state) => self::preview($state))
+                            ->visible(fn (Get $get): bool => $get('jenis') !== 'kredit'),
 
                         TextInput::make('tagline')
                             ->label('Kalimat Singkat di Bawah Judul')
@@ -73,12 +78,81 @@ class ProdukBankForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('2. Deskripsi dan Keunggulan')
+                Section::make('Pengaturan Produk Kredit')
+                    ->description('Atur kontak WhatsApp dan simulasi cicilan. Kalkulator hanya tampil jika diaktifkan.')
+                    ->columns(1)
+                    ->visible(fn (Get $get): bool => $get('jenis') === 'kredit')
+                    ->schema([
+                        TextInput::make('kontak_whatsapp')
+                            ->label('Nomor WhatsApp')
+                            ->tel()
+                            ->maxLength(32)
+                            ->helperText('Boleh diawali 08 atau 62. Tautan WhatsApp ditampilkan di halaman produk.')
+                            ->columnSpanFull(),
+
+                        Toggle::make('simulasi_aktif')
+                            ->label('Tampilkan kalkulator kredit')
+                            ->default(false)
+                            ->live()
+                            ->columnSpanFull(),
+
+                        TextInput::make('suku_bunga_kredit')
+                            ->label('Suku bunga per tahun')
+                            ->numeric()
+                            ->suffix('% p.a.')
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->required(fn (Get $get): bool => $get('jenis') === 'kredit' && (bool) $get('simulasi_aktif'))
+                            ->helperText('Dipakai untuk simulasi cicilan metode anuitas.')
+                            ->visible(fn (Get $get): bool => (bool) $get('simulasi_aktif')),
+
+                        TextInput::make('biaya_admin_persen')
+                            ->label('Biaya administrasi')
+                            ->numeric()
+                            ->suffix('%')
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->default(0)
+                            ->required(fn (Get $get): bool => $get('jenis') === 'kredit' && (bool) $get('simulasi_aktif'))
+                            ->helperText('Persentase biaya dihitung dari jumlah pinjaman.')
+                            ->visible(fn (Get $get): bool => (bool) $get('simulasi_aktif')),
+                    ]),
+
+                Section::make('Pengaturan Simulasi Tabungan Berjangka')
+                    ->description('Kalkulator memakai tenor dan suku bunga TAKAMUM yang diatur pada JavaScript website.')
+                    ->visible(fn (Get $get): bool => $get('jenis') === 'tabungan')
+                    ->schema([
+                        Toggle::make('simulasi_aktif')
+                            ->label('Tampilkan kalkulator tabungan berjangka')
+                            ->default(false)
+                            ->live()
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make(fn (Get $get): string => $get('jenis') === 'kredit' ? '2. Deskripsi Produk' : '2. Deskripsi dan Keunggulan')
                     ->schema([
                         Textarea::make('deskripsi')
                             ->label('Deskripsi Produk')
                             ->helperText('Pisahkan paragraf dengan satu baris kosong.')
-                            ->rows(8),
+                            ->rows(8)
+                            ->visible(fn (Get $get): bool => $get('jenis') !== 'kredit')
+                            ->dehydrated(fn (Get $get): bool => $get('jenis') !== 'kredit'),
+
+                        RichEditor::make('deskripsi_kredit')
+                            ->label('Deskripsi Produk')
+                            ->helperText('Atur tebal, ukuran melalui heading/teks kecil, serta daftar poin.')
+                            ->afterStateHydrated(fn (RichEditor $component, ?ProdukBank $record) => $component->state(
+                                $record?->jenis === 'kredit' ? $record->deskripsi : null
+                            ))
+                            ->toolbarButtons([
+                                ['bold', 'italic'],
+                                ['h2', 'h3', 'h4', 'small'],
+                                ['bulletList', 'orderedList'],
+                                ['undo', 'redo'],
+                            ])
+                            ->visible(fn (Get $get): bool => $get('jenis') === 'kredit')
+                            ->dehydrated(fn (Get $get): bool => $get('jenis') === 'kredit')
+                            ->columnSpanFull(),
 
                         Select::make('deskripsi_rata')
                             ->label('Perataan teks deskripsi')
@@ -88,13 +162,16 @@ class ProdukBankForm
                             ->native(false),
 
                         Textarea::make('keunggulan')
-                            ->label('Keunggulan')
-                            ->helperText('Satu baris = satu keunggulan. Tanda "-" di awal baris tidak perlu diketik.')
-                            ->rows(6),
+                            ->label(fn (Get $get): string => $get('jenis') === 'tabungan' ? 'Persyaratan Khusus Produk' : 'Keunggulan')
+                            ->helperText(fn (Get $get): string => $get('jenis') === 'tabungan'
+                                ? 'Satu baris = satu persyaratan khusus produk.'
+                                : 'Satu baris = satu keunggulan. Tanda "-" di awal baris tidak perlu diketik.')
+                            ->rows(6)
+                            ->visible(fn (Get $get): bool => $get('jenis') !== 'kredit'),
                     ]),
 
                 Section::make('3. Persyaratan dan Ketentuan')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         Textarea::make('persyaratan')
                             ->label('Persyaratan')
@@ -111,8 +188,11 @@ class ProdukBankForm
                     ->schema([
                         FileUpload::make('foto_utama')
                             ->label('Foto Produk')
-                            ->helperText('Tampil di sebelah kanan pengantar produk (rasio 4:3). Semua jenis gambar, maksimal 5 MB.')
+                            ->helperText(fn (Get $get): string => $get('jenis') === 'kredit'
+                                ? 'Tampil pada kartu produk kredit. Format JPG, JPEG, PNG, atau WEBP, maksimal 5 MB.'
+                                : 'Tampil di sebelah kanan pengantar produk (rasio 4:3). Format JPG, JPEG, PNG, atau WEBP, maksimal 5 MB.')
                             ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(5120)
                             ->disk('public')
                             ->directory('produk')
@@ -120,8 +200,9 @@ class ProdukBankForm
 
                         FileUpload::make('flyer')
                             ->label('Gambar Flyer')
-                            ->helperText('Tampil utuh dan bisa diklik untuk pop-up di website. Boleh lebih dari satu (misalnya depan dan belakang), maksimal 4. Maksimal 5 MB per gambar.')
+                            ->helperText('Format JPG, JPEG, PNG, atau WEBP. Tampil utuh dan bisa diklik untuk pop-up. Maksimal 4 gambar, 5 MB per gambar.')
                             ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->multiple()
                             ->reorderable()
                             ->maxFiles(4)
@@ -140,6 +221,7 @@ class ProdukBankForm
                             ->visibility('public')
                             ->downloadable(),
                     ]),
+
             ]);
     }
 }

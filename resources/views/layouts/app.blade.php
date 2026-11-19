@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-<link rel="stylesheet" href="{{ asset('css/jaringan-kantor.css') }}">
-<link href="images/logo-bbj-1x1.ico" rel="shortcut icon" type="images/x-icon">
+@stack('styles')
+<link href="{{ asset('images/logo-bbj-1x1.ico') }}" rel="shortcut icon" type="image/x-icon">
 </head>
 <body>
 
@@ -24,7 +24,9 @@
 
 @include('partials.footer')
 @include('partials.side-links')
+@include('partials.whatsapp-mengambang')
 
 <script src="{{ asset('js/script.js') }}" defer></script>
+@stack('scripts')
 </body>
 </html>

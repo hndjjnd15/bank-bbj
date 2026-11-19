@@ -524,7 +524,7 @@
     // profil perusahaan
     ".profil__kepala", ".profil__bagian",
     // produk (deposito)
-    ".produk__bagian",
+    ".produk__bagian", ".produk__bantuan > *",
     // footer
     ".footer__isi > *", ".footer__bawah"
   ].join(",");
@@ -599,7 +599,7 @@
   const rp = function (n) { return "Rp " + titik(n); };
   const persen = function (n) { return n.toFixed(2).replace(".", ",") + "%"; };
   const angka = function (s) { return parseInt(String(s).replace(/\D/g, ""), 10) || 0; };
-  const minimal = Math.min.apply(null, rates.map(function (r) { return r.min; }));
+  const minimal = parseInt(wadah.getAttribute("data-minimal"), 10) || 0;
 
   function tampilPesan(teks) {
     pesan.textContent = teks;
@@ -611,16 +611,16 @@
     const nominal = angka(inputNominal.value);
     const tenor = parseInt(pilihTenor.value, 10);
 
-    if (nominal < minimal) {
+    if (minimal > 0 && nominal < minimal) {
       tampilPesan("Nominal penempatan minimal " + rp(minimal) + ".");
       return;
     }
 
     const baris = rates.find(function (r) {
-      return r.tenor === tenor && nominal >= r.min && (r.maks === null || nominal < r.maks);
+      return r.tenor === tenor;
     });
     if (!baris) {
-      tampilPesan("Suku bunga untuk nominal dan jangka waktu ini belum tersedia. Silakan hubungi kantor kami.");
+      tampilPesan("Suku bunga untuk jangka waktu ini belum tersedia. Silakan hubungi kantor kami.");
       return;
     }
 
@@ -658,4 +658,371 @@
   cekPajak.addEventListener("change", hitung);
 
   hitung();
+})();
+
+/* ===== Simulasi cicilan kredit (metode anuitas) ===== */
+(function () {
+  const wadah = document.querySelector("[data-kalkulator-kredit]");
+  if (!wadah) return;
+
+  const bungaTahunan = Number(wadah.getAttribute("data-suku-bunga"));
+  const biayaAdminPersen = Number(wadah.getAttribute("data-biaya-admin-persen")) || 0;
+  const inputNominal = wadah.querySelector("[data-kredit-nominal]");
+  const nominalMin = Number(wadah.getAttribute("data-nominal-min"));
+  const nominalMaks = Number(wadah.getAttribute("data-nominal-maks"));
+  const langkahNominal = Number(wadah.getAttribute("data-nominal-langkah"));
+  const tampilanNominal = wadah.querySelector("[data-kredit-nominal-tampil]");
+  const tombolKurang = wadah.querySelector("[data-kredit-nominal-kurang]");
+  const tombolTambah = wadah.querySelector("[data-kredit-nominal-tambah]");
+  const tombolTenor = Array.from(wadah.querySelectorAll("[data-kredit-tenor]"));
+  const tampilanTenor = wadah.querySelector("[data-kredit-tenor-terpilih]");
+  const pesan = wadah.querySelector("[data-kredit-pesan]");
+  const hasil = wadah.querySelector("[data-kredit-hasil]");
+  const elCicilan = wadah.querySelector("[data-kredit-cicilan]");
+  const elPencairan = wadah.querySelector("[data-kredit-pencairan]");
+  const elBunga = wadah.querySelector("[data-kredit-bunga]");
+  const elAdmin = wadah.querySelector("[data-kredit-admin]");
+  const elTotal = wadah.querySelector("[data-kredit-total]");
+
+  if (!inputNominal || !tampilanNominal || !tombolKurang || !tombolTambah || !tombolTenor.length || !tampilanTenor || !pesan || !hasil || !elCicilan || !elPencairan || !elBunga || !elAdmin || !elTotal || !Number.isFinite(bungaTahunan)) return;
+
+  const rupiah = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
+  let tenor = 12;
+
+  function hitung() {
+    const pokok = Number(inputNominal.value);
+    const biayaAdmin = pokok * biayaAdminPersen / 100;
+    const pencairan = Math.max(0, pokok - biayaAdmin);
+
+    tampilanNominal.textContent = rupiah.format(pokok);
+    tampilanTenor.textContent = tenor + " bulan";
+
+    const bungaBulanan = bungaTahunan / 1200;
+    const cicilan = bungaBulanan === 0
+      ? pencairan / tenor
+      : pencairan * bungaBulanan / (1 - Math.pow(1 + bungaBulanan, -tenor));
+    const totalPokokBunga = cicilan * tenor;
+    const totalBunga = Math.max(0, totalPokokBunga - pencairan);
+
+    pesan.hidden = true;
+    hasil.hidden = false;
+    elCicilan.textContent = rupiah.format(cicilan);
+    elPencairan.textContent = rupiah.format(pencairan);
+    elBunga.textContent = rupiah.format(totalBunga);
+    elAdmin.textContent = rupiah.format(biayaAdmin);
+    elTotal.textContent = rupiah.format(totalPokokBunga + biayaAdmin);
+  }
+
+  function ubahNominal(nilai) {
+    inputNominal.value = String(Math.min(nominalMaks, Math.max(nominalMin, nilai)));
+    hitung();
+  }
+
+  function pilihTenor(tombol) {
+    tenor = Number(tombol.getAttribute("data-kredit-tenor"));
+    tombolTenor.forEach(function (item) {
+      item.setAttribute("aria-pressed", String(item === tombol));
+    });
+    hitung();
+  }
+
+  inputNominal.addEventListener("input", hitung);
+  tombolKurang.addEventListener("click", function () {
+    ubahNominal(Number(inputNominal.value) - langkahNominal);
+  });
+  tombolTambah.addEventListener("click", function () {
+    ubahNominal(Number(inputNominal.value) + langkahNominal);
+  });
+  tombolTenor.forEach(function (tombol) {
+    tombol.addEventListener("click", function () { pilihTenor(tombol); });
+  });
+
+  if (nominalMin > 0 && nominalMaks >= nominalMin && langkahNominal > 0) {
+    inputNominal.min = String(nominalMin);
+    inputNominal.max = String(nominalMaks);
+    inputNominal.step = String(langkahNominal);
+    inputNominal.value = String(Math.min(nominalMaks, Math.max(nominalMin, Number(inputNominal.value))));
+  }
+  hitung();
+})();
+
+/* ===== Simulasi tabungan berjangka ===== */
+(function () {
+  document.querySelectorAll("[data-kalkulator-tabungan]").forEach(function (kalkulator) {
+    const targetInput = kalkulator.querySelector("[data-tabungan-target]");
+    const tenorSelect = kalkulator.querySelector("[data-tabungan-tenor]");
+    const pesan = kalkulator.querySelector("[data-tabungan-pesan]");
+    if (!targetInput || !tenorSelect) return;
+
+    let jadwal = [
+      { tenor: 12, bunga: 3 },
+      { tenor: 24, bunga: 3.2 },
+      { tenor: 36, bunga: 3.4 },
+      { tenor: 48, bunga: 3.6 },
+      { tenor: 60, bunga: 3.8 },
+      { tenor: 72, bunga: 4 },
+      { tenor: 84, bunga: 4.2 }
+    ];
+    const dataJadwal = document.getElementById("data-bunga-tabungan");
+    if (dataJadwal) {
+      const jadwalAdmin = JSON.parse(dataJadwal.textContent);
+      if (Array.isArray(jadwalAdmin) && jadwalAdmin.length) jadwal = jadwalAdmin;
+    }
+    const konfigurasiTapen = (kalkulator.getAttribute("data-produk-tabungan") || "").includes("tapen");
+    const maksimalTarget = konfigurasiTapen ? 25000000 : 100000000;
+    const formatNominal = function (nilai) {
+      return new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(Math.round(nilai));
+    };
+    const formatRupiah = function (nilai) {
+      return "Rp " + formatNominal(nilai);
+    };
+    const tampilkan = function (selector, teks) {
+      const elemen = kalkulator.querySelector(selector);
+      if (elemen) elemen.textContent = teks;
+    };
+    const formatInputNominal = function () {
+      const teks = targetInput.value;
+      const posisi = targetInput.selectionStart === null ? teks.length : targetInput.selectionStart;
+      const digitSebelumPosisi = teks.slice(0, posisi).replace(/\D/g, "").length;
+      const digit = teks.replace(/\D/g, "");
+      const terformat = digit ? formatNominal(Number(digit)) : "";
+      targetInput.value = terformat;
+
+      if (document.activeElement === targetInput) {
+        let posisiBaru = 0;
+        let digitTerhitung = 0;
+        while (posisiBaru < terformat.length && digitTerhitung < digitSebelumPosisi) {
+          if (/\d/.test(terformat.charAt(posisiBaru))) digitTerhitung++;
+          posisiBaru++;
+        }
+        targetInput.setSelectionRange(posisiBaru, posisiBaru);
+      }
+    };
+
+    jadwal.forEach(function (paket, indeks) {
+      const opsi = new Option(
+        paket.tenor + " bulan (Bunga " + paket.bunga.toLocaleString("id-ID", { maximumFractionDigits: 2 }) + "%)",
+        String(paket.tenor),
+        indeks === 0,
+        indeks === 0
+      );
+      opsi.dataset.bunga = String(paket.bunga);
+      tenorSelect.add(opsi);
+    });
+    tampilkan("[data-tabungan-batas]", formatRupiah(maksimalTarget));
+
+    function hitung() {
+      const target = Number(targetInput.value.replace(/\D/g, ""));
+      const pilihan = tenorSelect.selectedOptions[0];
+      const tenor = Number(pilihan && pilihan.value);
+      const bungaTahunan = Number(pilihan && pilihan.getAttribute("data-bunga"));
+
+      if (!Number.isFinite(target) || target < 100000 || !Number.isFinite(tenor) || tenor <= 0 || !Number.isFinite(bungaTahunan)) {
+        ["[data-tabungan-setoran]", "[data-tabungan-hasil-target]", "[data-tabungan-hasil-tenor]", "[data-tabungan-hasil-bunga]", "[data-tabungan-total-setoran]", "[data-tabungan-bunga]"]
+          .forEach(function (selector) { tampilkan(selector, "-"); });
+        if (pesan) {
+          pesan.textContent = "Masukkan target minimal Rp 100.000 dan pilih jangka waktu yang tersedia.";
+          pesan.hidden = false;
+        }
+        return;
+      }
+
+      if (target > maksimalTarget) {
+        targetInput.value = formatNominal(maksimalTarget);
+        if (pesan) {
+          pesan.textContent = "Target disesuaikan ke batas maksimal paket sebesar " + formatRupiah(maksimalTarget) + ".";
+          pesan.hidden = false;
+        }
+      } else if (pesan) {
+        pesan.hidden = true;
+      }
+      const bungaBulanan = bungaTahunan / 100 / 12;
+      const faktorPertumbuhan = Math.pow(1 + bungaBulanan, tenor);
+      const targetDihitung = Math.min(target, maksimalTarget);
+      const setoran = bungaBulanan === 0
+        ? targetDihitung / tenor
+        : targetDihitung * bungaBulanan / (faktorPertumbuhan - 1);
+      const totalSetoran = setoran * tenor;
+      const estimasiBunga = Math.max(0, targetDihitung - totalSetoran);
+
+      tampilkan("[data-tabungan-setoran]", formatRupiah(setoran));
+      tampilkan("[data-tabungan-hasil-target]", formatRupiah(targetDihitung));
+      tampilkan("[data-tabungan-hasil-tenor]", tenor + " bulan");
+      tampilkan("[data-tabungan-hasil-bunga]", bungaTahunan.toLocaleString("id-ID", { maximumFractionDigits: 2 }) + "% p.a.");
+      tampilkan("[data-tabungan-total-setoran]", formatRupiah(totalSetoran));
+      tampilkan("[data-tabungan-bunga]", formatRupiah(estimasiBunga));
+    }
+
+    targetInput.addEventListener("input", function () {
+      formatInputNominal();
+      hitung();
+    });
+    tenorSelect.addEventListener("change", hitung);
+    formatInputNominal();
+    hitung();
+  });
+})();
+
+/* ===== Geser kartu produk ===== */
+(function () {
+  document.querySelectorAll("[data-produk-slider]").forEach(function (slider) {
+    const track = slider.querySelector("[data-produk-track]");
+    const sebelumnya = slider.querySelector("[data-produk-prev]");
+    const berikutnya = slider.querySelector("[data-produk-next]");
+    if (!track || !sebelumnya || !berikutnya) return;
+
+    function perbaruiTombol() {
+      sebelumnya.disabled = track.scrollLeft <= 2;
+      berikutnya.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+    }
+
+    function geser(arah) {
+      const kartu = track.querySelector(".kartu");
+      if (!kartu) return;
+      const jarak = kartu.getBoundingClientRect().width + 16;
+      track.scrollBy({ left: arah * jarak, behavior: "smooth" });
+    }
+
+    sebelumnya.addEventListener("click", function () { geser(-1); });
+    berikutnya.addEventListener("click", function () { geser(1); });
+    track.addEventListener("scroll", perbaruiTombol, { passive: true });
+    window.addEventListener("resize", perbaruiTombol);
+    perbaruiTombol();
+  });
+})();
+
+/* ===== Geser kartu beranda dengan mouse atau sentuhan ===== */
+(function () {
+  document.querySelectorAll("[data-drag-scroll]").forEach(function (track) {
+    let sedangDitarik = false;
+    let sudahBergerak = false;
+    let posisiAwal = 0;
+    let scrollAwal = 0;
+    let abaikanKlikSampai = 0;
+
+    track.addEventListener("pointerdown", function (event) {
+      if (event.pointerType !== "mouse" || event.button !== 0) return;
+
+      sedangDitarik = true;
+      sudahBergerak = false;
+      posisiAwal = event.clientX;
+      scrollAwal = track.scrollLeft;
+    });
+
+    window.addEventListener("pointermove", function (event) {
+      if (!sedangDitarik) return;
+
+      const jarak = event.clientX - posisiAwal;
+      if (!sudahBergerak && Math.abs(jarak) > 5) {
+        sudahBergerak = true;
+        track.classList.add("is-dragging");
+      }
+
+      if (sudahBergerak) {
+        track.scrollLeft = scrollAwal - jarak;
+        event.preventDefault();
+      }
+    });
+
+    function selesaiMenarik() {
+      if (!sedangDitarik) return;
+      sedangDitarik = false;
+
+      if (sudahBergerak) {
+        abaikanKlikSampai = Date.now() + 250;
+        track.classList.remove("is-dragging");
+      }
+    }
+
+    window.addEventListener("pointerup", selesaiMenarik);
+    window.addEventListener("pointercancel", selesaiMenarik);
+
+    track.addEventListener("click", function (event) {
+      if (Date.now() < abaikanKlikSampai) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
+
+    track.addEventListener("dragstart", function (event) {
+      event.preventDefault();
+    });
+  });
+})();
+
+/* ===== Carousel banner beranda ===== */
+(function () {
+  const carousel = document.querySelector("[data-banner-carousel]");
+  if (!carousel) return;
+
+  const slides = Array.from(carousel.querySelectorAll("[data-banner-slide]"));
+  const indikator = Array.from(carousel.querySelectorAll("[data-banner-go]"));
+  const sebelumnya = carousel.querySelector("[data-banner-prev]");
+  const berikutnya = carousel.querySelector("[data-banner-next]");
+  if (slides.length < 2) return;
+
+  let aktif = 0;
+  const gerakDikurangi = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let diarahkan = false;
+  let fokus = false;
+  let timer;
+
+  function jadwalkan() {
+    window.clearTimeout(timer);
+    if (gerakDikurangi || diarahkan || fokus || document.hidden) return;
+
+    const durasi = Number(slides[aktif].dataset.bannerDuration) || 6;
+    timer = window.setTimeout(function () {
+      tampilkan(aktif + 1);
+    }, Math.max(3, Math.min(30, durasi)) * 1000);
+  }
+
+  function tampilkan(index) {
+    slides[aktif].setAttribute("aria-hidden", "true");
+    slides[aktif].inert = true;
+    indikator[aktif].removeAttribute("aria-current");
+
+    aktif = (index + slides.length) % slides.length;
+    slides[aktif].setAttribute("aria-hidden", "false");
+    slides[aktif].inert = false;
+    indikator[aktif].setAttribute("aria-current", "true");
+    jadwalkan();
+  }
+
+  sebelumnya.addEventListener("click", function () {
+    tampilkan(aktif - 1);
+  });
+
+  berikutnya.addEventListener("click", function () {
+    tampilkan(aktif + 1);
+  });
+
+  indikator.forEach(function (tombol, index) {
+    tombol.addEventListener("click", function () {
+      tampilkan(index);
+    });
+  });
+
+  carousel.addEventListener("mouseenter", function () {
+    diarahkan = true;
+    jadwalkan();
+  });
+
+  carousel.addEventListener("mouseleave", function () {
+    diarahkan = false;
+    jadwalkan();
+  });
+
+  carousel.addEventListener("focusin", function () {
+    fokus = true;
+    jadwalkan();
+  });
+
+  carousel.addEventListener("focusout", function (event) {
+    fokus = carousel.contains(event.relatedTarget);
+    jadwalkan();
+  });
+
+  document.addEventListener("visibilitychange", jadwalkan);
+  jadwalkan();
 })();

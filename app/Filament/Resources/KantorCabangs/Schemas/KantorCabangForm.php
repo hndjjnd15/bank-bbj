@@ -17,9 +17,10 @@ class KantorCabangForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('1. Identitas Kantor')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('nama')
                             ->label('Nama Kantor')
@@ -58,7 +59,7 @@ class KantorCabangForm
                     ]),
 
                 Section::make('2. Alamat dan Peta')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         Textarea::make('alamat')
                             ->label('Alamat Lengkap')
@@ -89,7 +90,7 @@ class KantorCabangForm
                     ]),
 
                 Section::make('3. Kontak dan Jam Operasional')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('telepon')
                             ->label('Telepon')

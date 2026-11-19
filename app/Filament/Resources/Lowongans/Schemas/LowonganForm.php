@@ -23,10 +23,11 @@ class LowonganForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
 
                 Section::make('1. Informasi Lowongan')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('judul')
                             ->label('Nama Posisi')
@@ -107,7 +108,7 @@ class LowonganForm
                     ]),
 
                 Section::make('5. Cara Melamar')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('email_lamaran')
                             ->label('Email HRD Penerima Lamaran')

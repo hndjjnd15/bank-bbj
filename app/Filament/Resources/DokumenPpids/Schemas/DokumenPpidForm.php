@@ -15,6 +15,7 @@ class DokumenPpidForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 TextInput::make('judul')
                     ->label('Judul Dokumen')

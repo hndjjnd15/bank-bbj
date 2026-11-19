@@ -28,13 +28,13 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Tabel suku bunga deposito: satu baris = satu kombinasi tenor dan rentang nominal
+        // Tabel suku bunga: satu baris = satu produk dan tenor
         Schema::create('suku_bunga_depositos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('produk_bank_id')->constrained('produk_banks')->cascadeOnDelete();
             $table->unsignedSmallInteger('tenor_bulan');
-            $table->unsignedBigInteger('nominal_min');
-            $table->unsignedBigInteger('nominal_maks')->nullable();   // batas atas (tidak termasuk); kosong = tanpa batas
             $table->decimal('bunga', 5, 2);                          // persen per tahun (p.a.)
+            $table->unique(['produk_bank_id', 'tenor_bulan'], 'suku_bunga_produk_tenor_unique');
             $table->timestamps();
         });
     }

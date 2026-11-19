@@ -19,9 +19,10 @@ class ProgramCsrForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('1. Informasi Program')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('judul')
                             ->label('Nama Program / Kegiatan')

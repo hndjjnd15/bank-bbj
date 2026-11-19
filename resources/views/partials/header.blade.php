@@ -23,9 +23,9 @@
             <svg class="panah" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 3.5 5 7l3.5-3.5"/></svg>
           </button>
           <ul class="dropdown">
-            <li><a href="/tabungan"><strong>Tabungan Tamasa</strong><small>Mulai Rp 25.000, akses mudah</small></a></li>
+            <li><a href="{{ route('tabungan.index') }}"><strong>Produk Tabungan</strong><small>Pilihan tabungan untuk berbagai kebutuhan</small></a></li>
             <li><a href="/deposito"><strong>Deposito Pikat</strong><small>Bunga s.d 5,25% p.a., tenor 1–24 bulan</small></a></li>
-            <li><a href="/kredit/multiguna"><strong>Kredit Multiguna</strong><small>Dana s.d Rp 300 juta</small></a></li>
+            <li><a href="/kredit"><strong>Produk Kredit</strong><small>Pilihan pembiayaan untuk berbagai kebutuhan</small></a></li>
           </ul>
         </li>
 
@@ -60,7 +60,7 @@
             <svg class="panah" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 3.5 5 7l3.5-3.5"/></svg>
           </button>
           <ul class="dropdown">
-            <li><a href="/#faq"><strong>FAQ</strong><small>Jawaban cepat seputar produk</small></a></li>
+            <li><a href="/faq"><strong>FAQ</strong><small>Jawaban cepat seputar produk</small></a></li>
             <li><a href="/pengaduan"><strong>Pengaduan nasabah</strong><small>Sampaikan keluhan Anda</small></a></li>
             <li><a href="/wbs"><strong>Whistleblowing (WBS)</strong><small>Laporkan pelanggaran</small></a></li>
             <li><a href="/ppid"><strong>PPID</strong><small>Informasi publik</small></a></li>

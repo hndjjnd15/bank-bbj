@@ -27,17 +27,18 @@ class LelangForm
         $angka = preg_replace('/\D+/', '', (string) $state);   // buang titik dan karakter non-angka
 
         return $angka !== ''
-            ? 'Preview: Rp ' . number_format((float) $angka, 0, ',', '.')
+            ? 'Preview: Rp '.number_format((float) $angka, 0, ',', '.')
             : 'Ketik angka saja, titik pemisah ribuan muncul otomatis.';
     }
 
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
 
                 Section::make('1. Identitas Jaminan & Status Lelang')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('judul')
                             ->label('Nama Jaminan / Judul Properti Agunan')
@@ -78,7 +79,7 @@ class LelangForm
                     ]),
 
                 Section::make('2. Spesifikasi Fisik (Luas Tanah & Bangunan)')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('luas_tanah')
                             ->label('Luas Tanah')
@@ -94,7 +95,7 @@ class LelangForm
                     ]),
 
                 Section::make('3. Lokasi, Titik Koordinat GPS & Google Maps')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         Textarea::make('alamat')
                             ->label('Alamat Lengkap Jaminan')
@@ -124,7 +125,7 @@ class LelangForm
                     ]),
 
                 Section::make('4. Nilai Agunan & Harga Limit Lelang')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('harga_limit')
                             ->label('Harga Limit Lelang (Rp)')
@@ -149,7 +150,7 @@ class LelangForm
                     ]),
 
                 Section::make('5. Kontak WA Marketing & Link Sosmed Instagram')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('pic_nama')
                             ->label('Nama PIC / Marketing Lelang')

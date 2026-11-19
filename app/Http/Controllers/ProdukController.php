@@ -2,11 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Faq;
 use App\Models\ProdukBank;
 use App\Models\SukuBungaDeposito;
 
 class ProdukController extends Controller
 {
+    public function tabungan()
+    {
+        $produk = ProdukBank::query()
+            ->where('jenis', 'tabungan')
+            ->where('diterbitkan', true)
+            ->orderBy('id')
+            ->get();
+
+        return view('produk.tabungan.index', compact('produk'));
+    }
+
+    public function tabunganDetail(string $slug)
+    {
+        $produk = ProdukBank::query()
+            ->where('jenis', 'tabungan')
+            ->where('diterbitkan', true)
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        $faq = Faq::query()
+            ->terbit()
+            ->where('halaman', 'tabungan')
+            ->get();
+
+        $lainnya = ProdukBank::query()
+            ->where('jenis', 'tabungan')
+            ->where('diterbitkan', true)
+            ->where('id', '!=', $produk->id)
+            ->orderBy('id')
+            ->get();
+
+        $sukuBunga = $produk->sukuBunga()->orderBy('tenor_bulan')->get();
+        $jadwalBunga = $sukuBunga->map(fn (SukuBungaDeposito $baris): array => [
+            'tenor' => (int) $baris->tenor_bulan,
+            'bunga' => (float) $baris->bunga,
+        ])->values()->all();
+
+        return view('produk.tabungan.show', compact('produk', 'faq', 'lainnya', 'sukuBunga', 'jadwalBunga'));
+    }
+
+    public function kredit()
+    {
+        $produk = ProdukBank::query()
+            ->where('jenis', 'kredit')
+            ->where('diterbitkan', true)
+            ->orderBy('id')
+            ->get();
+
+        return view('produk.kredit.index', compact('produk'));
+    }
+
+    public function kreditDetail(string $slug)
+    {
+        $produk = ProdukBank::query()
+            ->where('jenis', 'kredit')
+            ->where('diterbitkan', true)
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        $faq = Faq::query()
+            ->terbit()
+            ->where('halaman', 'kredit')
+            ->where('produk_bank_id', $produk->id)
+            ->get();
+
+        $lainnya = ProdukBank::query()
+            ->where('jenis', 'kredit')
+            ->where('diterbitkan', true)
+            ->where('id', '!=', $produk->id)
+            ->orderBy('id')
+            ->get();
+
+        return view('produk.kredit.show', compact('produk', 'faq', 'lainnya'));
+    }
+
     // Halaman deposito: /deposito
     public function deposito()
     {
@@ -17,35 +93,28 @@ class ProdukController extends Controller
 
         abort_if($produk === null, 404);
 
-        // Semua baris suku bunga, urut tenor lalu nominal
-        $baris = SukuBungaDeposito::query()->orderBy('tenor_bulan')->orderBy('nominal_min')->get();
+        $faq = Faq::query()
+            ->terbit()
+            ->where('halaman', 'deposito')
+            ->get();
 
-        // Baris tabel = tenor; kolom tabel = rentang nominal (satu perwakilan per rentang)
-        $tenor = $baris->pluck('tenor_bulan')->map(fn ($t) => (int) $t)->unique()->sort()->values()->all();
-        $rentang = $baris->unique(fn ($r) => $r->kunci_rentang)->sortBy('nominal_min')->values();
-
-        // $matriks[tenor][kunci_rentang] = baris suku bunga
-        $matriks = [];
-        foreach ($baris as $r) {
-            $matriks[(int) $r->tenor_bulan][$r->kunci_rentang] = $r;
-        }
+        $baris = $produk->sukuBunga()->orderBy('tenor_bulan')->get();
+        $tenor = $baris->pluck('tenor_bulan')->map(fn ($t) => (int) $t)->all();
 
         // Angka ringkasan dihitung dari data, bukan diketik manual
         $ringkasan = [
             'tenor_terpendek' => $tenor ? min($tenor) : null,
             'tenor_terpanjang' => $tenor ? max($tenor) : null,
             'bunga_tertinggi' => $baris->max('bunga'),
-            'nominal_terkecil' => (int) ($baris->min('nominal_min') ?? $produk->setoran_minimal ?? 0),
+            'nominal_terkecil' => (int) ($produk->setoran_minimal ?? 0),
         ];
 
         // Data untuk kalkulator di browser
         $dataKalkulator = $baris->map(fn ($r) => [
             'tenor' => (int) $r->tenor_bulan,
-            'min' => (int) $r->nominal_min,
-            'maks' => $r->nominal_maks !== null ? (int) $r->nominal_maks : null,
             'bunga' => (float) $r->bunga,
         ])->values()->all();
 
-        return view('produk.deposito', compact('produk', 'baris', 'tenor', 'rentang', 'matriks', 'ringkasan', 'dataKalkulator'));
+        return view('produk.deposito', compact('produk', 'faq', 'baris', 'tenor', 'ringkasan', 'dataKalkulator'));
     }
 }

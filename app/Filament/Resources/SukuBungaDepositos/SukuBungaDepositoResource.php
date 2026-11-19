@@ -19,8 +19,10 @@ class SukuBungaDepositoResource extends Resource
     protected static ?string $model = SukuBungaDeposito::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-    protected static ?string $modelLabel = 'Suku Bunga Deposito';
-    protected static ?string $pluralModelLabel = 'Suku Bunga Deposito';
+
+    protected static ?string $modelLabel = 'Suku Bunga Produk';
+
+    protected static ?string $pluralModelLabel = 'Suku Bunga Produk';
 
     public static function form(Schema $schema): Schema
     {

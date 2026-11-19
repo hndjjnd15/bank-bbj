@@ -33,6 +33,7 @@ class LaporanTahunanForm
         }
 
         return $schema
+            ->columns(1)
             ->components([
                 TextInput::make('tahun')
                     ->label('Tahun')
@@ -46,7 +47,7 @@ class LaporanTahunanForm
 
                 Section::make('Berkas laporan')
                     ->description('Format: PDF, Word, atau Excel. Maksimal 20 MB per berkas. Berkas bersifat publik dan dapat diunduh siapa saja.')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema($unggahan),
             ]);
     }

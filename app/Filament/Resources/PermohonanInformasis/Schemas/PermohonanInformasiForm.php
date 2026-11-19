@@ -15,9 +15,10 @@ class PermohonanInformasiForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('Tindak lanjut')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('kode')->label('Nomor registrasi')->disabled(),
 
@@ -34,7 +35,7 @@ class PermohonanInformasiForm
                     ]),
 
                 Section::make('Data pemohon')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('jenis_pemohon')->label('Jenis pemohon')->disabled(),
                         TextInput::make('nama')->label('Nama')->disabled(),

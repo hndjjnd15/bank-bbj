@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Faq;
 use App\Models\ProdukBank;
 use App\Models\SukuBungaDeposito;
 use Illuminate\Database\Seeder;
@@ -12,7 +13,16 @@ class ProdukDepositoSeeder extends Seeder
     {
         // Semua isi di bawah hanya CONTOH (termasuk angka suku bunga). Ganti dengan data asli lewat /admin
         // sebelum website tayang.
-        ProdukBank::updateOrCreate(['slug' => 'deposito'], [
+        $faq = [
+            ['tanya' => 'Apa itu deposito?', 'jawab' => 'Deposito adalah simpanan berjangka yang penarikannya hanya dapat dilakukan pada waktu tertentu sesuai perjanjian antara nasabah dan bank.'],
+            ['tanya' => 'Bagaimana cara membuka deposito?', 'jawab' => 'Kunjungi kantor cabang terdekat dengan membawa dokumen persyaratan yang tercantum pada halaman ini, lalu lakukan penempatan dana sesuai nominal dan jangka waktu yang dipilih. (Jawaban contoh, sesuaikan dengan prosedur bank.)'],
+            ['tanya' => 'Berapa setoran minimal deposito?', 'jawab' => 'Setoran minimal tercantum pada informasi produk deposito di halaman ini.'],
+            ['tanya' => 'Apakah bunga deposito dikenai pajak?', 'jawab' => 'Bunga deposito dikenai PPh final sebesar '.rtrim(rtrim(number_format((float) config('deposito.pajak_persen'), 2, ',', '.'), '0'), ',').'% dari bunga, kecuali untuk deposito dengan nominal tidak lebih dari Rp '.number_format((float) config('deposito.batas_bebas_pajak'), 0, ',', '.').'. Gunakan kalkulator pada halaman ini untuk melihat perkiraannya.'],
+            ['tanya' => 'Apakah deposito dijamin LPS?', 'jawab' => (string) config('deposito.lps_catatan')],
+            ['tanya' => 'Apakah deposito bisa dicairkan sebelum jatuh tempo?', 'jawab' => 'Ketentuan pencairan sebelum jatuh tempo mengikuti kebijakan bank. Silakan hubungi kantor cabang terdekat untuk penjelasan lengkap. (Jawaban contoh, sesuaikan dengan kebijakan bank.)'],
+        ];
+
+        $produkDeposito = ProdukBank::updateOrCreate(['slug' => 'deposito'], [
             'jenis' => 'deposito',
             'judul' => 'Deposito',
             'tagline' => 'Simpanan berjangka dengan bunga menarik dan tenor yang fleksibel.',
@@ -27,29 +37,32 @@ class ProdukDepositoSeeder extends Seeder
             'diterbitkan' => true,
         ]);
 
-        // Tabel suku bunga CONTOH: 5 tenor x 3 rentang nominal
-        SukuBungaDeposito::query()->delete();
-        $rentang = [
-            [5000000, 100000000],
-            [100000000, 500000000],
-            [500000000, null],
-        ];
-        $bunga = [
-            1 => [3.50, 3.75, 4.00],
-            3 => [3.75, 4.00, 4.25],
-            6 => [4.00, 4.25, 4.50],
-            12 => [4.50, 4.75, 5.00],
-            24 => [4.75, 5.00, 5.25],
-        ];
-        foreach ($bunga as $tenor => $daftar) {
-            foreach ($rentang as $i => [$min, $maks]) {
-                SukuBungaDeposito::create([
-                    'tenor_bulan' => $tenor,
-                    'nominal_min' => $min,
-                    'nominal_maks' => $maks,
-                    'bunga' => $daftar[$i],
-                ]);
+        // Satu baris FAQ hanya punya satu penempatan, jadi pertanyaan yang sama
+        // disimpan sekali untuk beranda dan sekali untuk halaman deposito.
+        foreach ($faq as $urutan => $item) {
+            foreach (['beranda', 'deposito'] as $halaman) {
+                Faq::firstOrCreate(
+                    ['halaman' => $halaman, 'tanya' => $item['tanya']],
+                    ['jawab' => $item['jawab'], 'urutan' => $urutan, 'diterbitkan' => true],
+                );
             }
+        }
+
+        // Jadwal suku bunga CONTOH; sesuaikan dengan data resmi melalui /admin
+        SukuBungaDeposito::query()->where('produk_bank_id', $produkDeposito->id)->delete();
+        $bunga = [
+            1 => 3.50,
+            3 => 3.75,
+            6 => 4.00,
+            12 => 4.50,
+            24 => 4.75,
+        ];
+        foreach ($bunga as $tenor => $nilai) {
+            SukuBungaDeposito::create([
+                'produk_bank_id' => $produkDeposito->id,
+                'tenor_bulan' => $tenor,
+                'bunga' => $nilai,
+            ]);
         }
     }
 }

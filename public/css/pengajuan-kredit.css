@@ -1,0 +1,476 @@
+/* ===== Formulir Pengajuan Kredit =====
+   Gaya mengikuti formulir native (kartu putih, aksen biru), dibatasi di dalam .pk
+   supaya tidak mengganggu komponen lain di website. */
+
+.pk,
+.pk-sukses {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+.pk__wadah {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.pk__kepala {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 15px;
+  text-align: center;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.pk__logo {
+  width: 300px;
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.pk__kepala h1 {
+  font-size: 32px;
+  color: #004b8d;
+  margin-bottom: 10px;
+}
+
+.pk__kepala p {
+  color: #666;
+  font-size: 16px;
+}
+
+.pk .card {
+  background: #ffffff;
+  padding: 30px;
+  margin-bottom: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.pk .card h2 {
+  color: #004b8d;
+  font-size: 22px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f1f1f1;
+}
+
+.pk .form-group {
+  margin-bottom: 20px;
+}
+
+.pk label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.pk input,
+.pk select,
+.pk textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: 0.3s;
+  margin-bottom: 15px;
+  background: #ffffff;
+}
+
+.pk input:focus,
+.pk select:focus,
+.pk textarea:focus {
+  outline: none;
+  border-color: #004b8d;
+  box-shadow: 0 0 10px rgba(0, 75, 141, 0.2);
+}
+
+.pk textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.pk input[type="file"] {
+  padding: 12px;
+  background: #f9fafb;
+}
+
+.pk input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.pk button[type="submit"] {
+  width: 100%;
+  border: none;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 12px;
+  background: #004b8d;
+  color: #ffffff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.pk button[type="submit"]:hover {
+  transform: translateY(-2px);
+  background: #0066c0;
+}
+
+.pk .hidden {
+  display: none !important;
+}
+
+.pk .pk-jebakan {
+  display: none;
+}
+
+.pk small {
+  display: block;
+  color: #666;
+  margin-top: -8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.pk .pk-galat {
+  color: #c62828;
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.pk-alert {
+  padding: 15px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.pk-alert--galat {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.pk-alert strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.pk-alert ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.pk-disclaimer {
+  background: #f5f7fa;
+  border: 1px solid #e3e9f0;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  font-size: 14px;
+}
+
+.pk-disclaimer strong {
+  color: #173b6d;
+}
+
+.pk-disclaimer p {
+  margin: 8px 0 0;
+}
+
+.pk .pk-cek {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 400;
+  color: #333;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+
+.pk .pk-cek span {
+  font-size: 14px;
+}
+
+/* ===== Popup validasi ===== */
+.pk .popup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(20, 35, 55, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 99999;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.pk .popup.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.pk .popup-content {
+  width: 480px;
+  max-width: 100%;
+  padding: 36px 30px 34px;
+  background: #ffffff;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  transform: translateY(25px) scale(0.92);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s ease;
+}
+
+.pk .popup.show .popup-content {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.pk .popup-icon {
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff1f1;
+  color: #dc2626;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  animation: pkPopupIcon 0.45s ease;
+}
+
+@keyframes pkPopupIcon {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.pk .popup-header {
+  padding: 0;
+  background: transparent;
+  color: #173b6d;
+}
+
+.pk .popup-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #173b6d;
+}
+
+.pk .popup-body {
+  padding: 10px 10px 24px;
+  color: #667085;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.pk .popup-body p {
+  margin: 0;
+}
+
+.pk .popup-footer {
+  padding: 0;
+}
+
+.pk .popup-footer button {
+  width: 100%;
+  min-height: 49px;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 7px;
+  background: #1f70b5;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pk .popup-footer button:hover {
+  background: #195f9b;
+  box-shadow: 0 5px 15px rgba(31, 112, 181, 0.25);
+}
+
+.pk .popup-footer button:active {
+  transform: scale(0.98);
+}
+
+/* ===== Halaman sukses ===== */
+.pk-sukses {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.pk-sukses .success-wrapper {
+  width: 100%;
+  max-width: 650px;
+  padding: 25px;
+  box-sizing: border-box;
+}
+
+.pk-sukses .success-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 45px 35px;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+}
+
+.pk-sukses .success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e8f7ee;
+  color: #198754;
+  font-size: 42px;
+  font-weight: bold;
+}
+
+.pk-sukses .success-card h1 {
+  margin: 0 0 12px;
+  color: #173b6d;
+  font-size: 28px;
+}
+
+.pk-sukses .success-card p {
+  margin: 8px 0;
+  color: #555;
+  line-height: 1.7;
+}
+
+.pk-sukses .ticket-box {
+  margin: 25px 0;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f5f8fc;
+  border: 1px solid #dce5f0;
+}
+
+.pk-sukses .ticket-label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+  color: #777;
+}
+
+.pk-sukses .ticket-number {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: #173b6d;
+  letter-spacing: 1px;
+}
+
+.pk-sukses .success-note {
+  font-size: 14px;
+  color: #666;
+}
+
+.pk-sukses .btn-home {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 13px 25px;
+  border-radius: 8px;
+  background: #173b6d;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.pk-sukses .btn-home:hover {
+  opacity: 0.9;
+}
+
+.pk-sukses .bank-name {
+  margin-top: 25px;
+  font-size: 13px;
+  color: #888;
+}
+
+@media (max-width: 768px) {
+  .pk__kepala {
+    padding: 25px;
+  }
+
+  .pk__kepala h1 {
+    font-size: 24px;
+  }
+
+  .pk .card {
+    padding: 20px;
+  }
+
+  .pk .card h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .pk .popup {
+    padding: 15px;
+  }
+
+  .pk .popup-content {
+    width: 100%;
+    padding: 30px 22px 28px;
+    border-radius: 18px;
+  }
+
+  .pk .popup-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 29px;
+    margin-bottom: 18px;
+  }
+
+  .pk .popup-header h3 {
+    font-size: 20px;
+  }
+
+  .pk .popup-body {
+    font-size: 14px;
+    padding: 9px 5px 22px;
+  }
+
+  .pk .popup-footer button {
+    min-height: 48px;
+  }
+
+  .pk-sukses .success-card {
+    padding: 35px 22px;
+  }
+
+  .pk-sukses .success-card h1 {
+    font-size: 24px;
+  }
+
+  .pk-sukses .ticket-number {
+    font-size: 19px;
+  }
+}

@@ -15,9 +15,10 @@ class LaporanPelanggaranForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('Tindak lanjut')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('kode')->label('Kode laporan')->disabled(),
 
@@ -39,7 +40,7 @@ class LaporanPelanggaranForm
                     ]),
 
                 Section::make('Identitas pelapor (rahasia)')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('nama_pelapor')->label('Nama pelapor')->placeholder('(tidak dicantumkan)')->disabled(),
                         TextInput::make('email')->label('Email')->disabled(),
@@ -48,7 +49,7 @@ class LaporanPelanggaranForm
                     ]),
 
                 Section::make('Isi laporan')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('kategori')->label('Kategori')->disabled(),
                         DatePicker::make('tanggal_kejadian')->label('Tanggal kejadian')->disabled(),

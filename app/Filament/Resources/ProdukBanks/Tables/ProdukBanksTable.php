@@ -25,18 +25,22 @@ class ProdukBanksTable
                     ->formatStateUsing(fn ($state) => ProdukBank::JENIS[$state] ?? $state),
                 TextColumn::make('setoran_minimal')
                     ->label('Setoran minimal')
-                    ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format((float) $state, 0, ',', '.') : '-'),
+                    ->formatStateUsing(fn ($state) => $state ? 'Rp '.number_format((float) $state, 0, ',', '.') : '-')
+                    ->visible(fn ($record): bool => $record === null || $record->jenis !== 'kredit'),
                 IconColumn::make('brosur_pdf')->label('Brosur')->boolean(),
                 IconColumn::make('diterbitkan')->label('Tampil')->boolean(),
             ])
             ->recordActions([
-                // Halaman deposito sudah ada; tabungan dan kredit menyusul
                 Action::make('lihat')
                     ->label('Lihat')
                     ->icon('heroicon-o-eye')
-                    ->url(fn ($record) => url('/' . $record->jenis))
+                    ->url(fn ($record) => $record->jenis === 'kredit'
+                        ? route('kredit.show', $record->slug)
+                        : ($record->jenis === 'tabungan'
+                            ? route('tabungan.show', $record->slug)
+                            : url('/'.$record->jenis)))
                     ->openUrlInNewTab()
-                    ->visible(fn ($record) => $record->jenis === 'deposito'),
+                    ->visible(fn ($record) => in_array($record->jenis, ['deposito', 'tabungan', 'kredit'], true)),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
