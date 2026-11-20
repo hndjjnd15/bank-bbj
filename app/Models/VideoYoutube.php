@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class VideoYoutube extends Model
 {
-    protected $fillable = ['url', 'urutan', 'diterbitkan'];
+    protected $fillable = ['judul', 'url', 'urutan', 'diterbitkan'];
 
     protected $casts = [
         'urutan' => 'integer',
@@ -24,9 +24,22 @@ class VideoYoutube extends Model
 
     public function getEmbedUrlAttribute(): ?string
     {
-        $id = self::idDariUrl($this->url);
+        $id = $this->youtube_id;
 
         return $id ? 'https://www.youtube-nocookie.com/embed/'.$id : null;
+    }
+
+    public function getYoutubeIdAttribute(): ?string
+    {
+        return self::idDariUrl($this->url);
+    }
+
+    // Gambar pratinjau ringan untuk kartu daftar putar (rasio 16:9).
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        $id = $this->youtube_id;
+
+        return $id ? 'https://i.ytimg.com/vi/'.$id.'/mqdefault.jpg' : null;
     }
 
     public static function idDariUrl(?string $url): ?string

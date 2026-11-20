@@ -20,6 +20,7 @@ use App\Filament\Resources\PengajuanKredits\PengajuanKreditResource;
 use App\Filament\Resources\PengaturanSitus\PengaturanSitusResource;
 use App\Filament\Resources\PengurusPerusahaans\PengurusPerusahaanResource;
 use App\Filament\Resources\PermohonanInformasis\PermohonanInformasiResource;
+use App\Filament\Resources\PopupPromos\PopupPromoResource;
 use App\Filament\Resources\ProdukBanks\ProdukBankResource;
 use App\Filament\Resources\ProfilPerusahaans\ProfilPerusahaanResource;
 use App\Filament\Resources\ProgramCsrs\ProgramCsrResource;
@@ -131,6 +132,7 @@ class AdminPanelProvider extends PanelProvider
                             ->items([
                                 ...BeritaResource::getNavigationItems(),
                                 ...BannerBerandaResource::getNavigationItems(),
+                                ...PopupPromoResource::getNavigationItems(),
                                 ...FaqResource::getNavigationItems(),
                                 ...LelangsResource::getNavigationItems(),
                                 ...LowonganResource::getNavigationItems(),

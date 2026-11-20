@@ -89,10 +89,11 @@
       <div>
         <p class="beranda-eyebrow">Informasi simpanan</p>
         <h2 id="judul-suku-bunga">Suku Bunga Produk dan Deposito</h2>
-        <p>Periode berlaku: 1 Juli 2026 - 30 September 2026.<br> Semua tingkat bunga mengikuti ketentuan & penjaminan LPS</p>
+        <p>Periode berlaku: 1 November 2026 - 31 Januari 2026.<br> Semua tingkat bunga mengikuti ketentuan & penjaminan LPS</p>
       </div>
       <div class="beranda-suku-bunga__aksi">
-        <span class="beranda-lps"><span aria-hidden="true">✓</span> Jaminan: LPS</span>
+        <span class="beranda-lps"><span aria-hidden="true">✓<a href="https://lps.go.id/" target="_blank" rel="noopener noreferrer">
+        </span> Jaminan: LPS</span></a>
         <a class="beranda-tautan" href="/deposito">Informasi deposito <span aria-hidden="true">&rarr;</span></a>
       </div>
     </header>
@@ -154,25 +155,72 @@
     <header class="beranda-kepala beranda-kepala--tengah">
       <div>
         <p class="beranda-eyebrow">Video Bank BBJ</p>
-        <h2 id="judul-video">Kanal YouTube</h2>
-        <p>Saksikan informasi dan kegiatan Bank BBJ.</p>
+        <h2 id="judul-video">Channel YouTube</h2>
+        <p>Saksikan berbagai informasi, edukasi keuangan, dan kegiatan Bank BBJ melalui kanal YouTube resmi kami. Dapatkan insight seputar produk, layanan, dan inovasi terbaru untuk kemudahan transaksi Anda. </p>
       </div>
     </header>
 
     @if ($videoYoutube->isNotEmpty())
-      <div class="beranda-video">
-        @foreach ($videoYoutube as $video)
-          <div class="beranda-video__kartu">
-            <iframe
-              src="{{ $video->embed_url }}"
-              title="Video Bank BBJ {{ $loop->iteration }}"
-              loading="lazy"
-              referrerpolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-            ></iframe>
+      @php($videoUtama = $videoYoutube->first())
+      <div class="beranda-video" data-video-utama>
+        <div class="beranda-video__pemutar">
+          <iframe
+            data-video-frame
+            src="{{ $videoUtama->embed_url }}"
+            title="{{ $videoUtama->judul ?: 'Video Bank BBJ 1' }}"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        </div>
+
+        <div class="beranda-video__sisi">
+          <p class="beranda-video__label">
+            <span>Daftar putar</span>
+            <span>{{ $videoYoutube->count() }} video</span>
+          </p>
+
+          <div class="beranda-video__daftar" data-video-daftar aria-label="Daftar putar video Bank BBJ">
+            @foreach ($videoYoutube as $video)
+              @php($judulVideo = $video->judul ?: 'Video Bank BBJ '.$loop->iteration)
+              <article
+                class="beranda-video__item {{ $loop->first ? 'is-aktif' : '' }}"
+                data-video-item
+                data-video-src="{{ $video->embed_url }}"
+                data-video-judul="{{ $judulVideo }}"
+              >
+                <button
+                  type="button"
+                  class="beranda-video__pilih"
+                  data-video-play
+                  aria-label="Putar {{ $judulVideo }}"
+                  aria-pressed="{{ $loop->first ? 'true' : 'false' }}"
+                >
+                  <span class="beranda-video__gambar">
+                    @if ($video->thumbnail_url)
+                      <img src="{{ $video->thumbnail_url }}" alt="" width="320" height="180" loading="lazy">
+                    @endif
+                    <span class="beranda-video__putar" aria-hidden="true"></span>
+                  </span>
+                </button>
+
+                <span class="beranda-video__teks">
+                  <strong>{{ $judulVideo }}</strong>
+                  <a
+                    class="beranda-video__tautan"
+                    href="{{ $video->url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Tonton di YouTube
+                    <span aria-hidden="true">&#8599;</span>
+                  </a>
+                </span>
+              </article>
+            @endforeach
           </div>
-        @endforeach
+        </div>
       </div>
     @else
       <p class="beranda-kosong beranda-kosong--video">Video akan tampil setelah tautan ditambahkan melalui menu Video YouTube di admin.</p>
@@ -225,4 +273,6 @@
       <a class="ppid__tombol" href="/faq">Lihat semua FAQ</a>
     </p>
   </section>
+
+  @include('partials.popup-promo')
 @endsection

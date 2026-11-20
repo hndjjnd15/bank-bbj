@@ -15,6 +15,11 @@ class VideoYoutubesTable
     {
         return $table
             ->columns([
+                TextColumn::make('judul')
+                    ->label('Judul')
+                    ->placeholder('Video Bank BBJ')
+                    ->searchable()
+                    ->wrap(),
                 TextColumn::make('url')
                     ->label('Tautan video')
                     ->url(fn ($record): string => $record->url)

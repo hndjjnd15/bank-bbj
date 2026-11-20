@@ -121,11 +121,16 @@ class SukuBungaProdukTest extends TestCase
 
         $produkDeposito = ProdukBank::where('slug', 'deposito')->firstOrFail();
 
-        $this->assertSame(5, $produkDeposito->sukuBunga()->count());
+        $this->assertSame(3, $produkDeposito->sukuBunga()->count());
         $this->assertDatabaseHas('suku_bunga_depositos', [
             'produk_bank_id' => $produkDeposito->id,
             'tenor_bulan' => 12,
-            'bunga' => 4.5,
+            'bunga' => 6.25,
+        ]);
+        $this->assertDatabaseHas('suku_bunga_depositos', [
+            'produk_bank_id' => $produkDeposito->id,
+            'tenor_bulan' => 3,
+            'bunga' => 5.75,
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class PengaturanSitus extends Model
 {
@@ -20,11 +21,16 @@ class PengaturanSitus extends Model
         'whatsapp',
         'whatsapp_pesan',
         'whatsapp_aktif',
+        'loading_aktif',
+        'loading_gif',
+        'loading_durasi',
         'pengajuan_kredit_samarkan_nik',
     ];
 
     protected $casts = [
         'whatsapp_aktif' => 'boolean',
+        'loading_aktif' => 'boolean',
+        'loading_durasi' => 'integer',
         'pengajuan_kredit_samarkan_nik' => 'boolean',
     ];
 
@@ -54,6 +60,8 @@ class PengaturanSitus extends Model
             'whatsapp' => self::WHATSAPP_BAWAAN,
             'whatsapp_pesan' => self::PESAN_BAWAAN,
             'whatsapp_aktif' => true,
+            'loading_aktif' => false,
+            'loading_durasi' => 2,
             'pengajuan_kredit_samarkan_nik' => false,
         ]);
 
@@ -101,5 +109,25 @@ class PengaturanSitus extends Model
     public function getTampilAttribute(): bool
     {
         return (bool) $this->whatsapp_aktif && $this->tautan_whatsapp !== null;
+    }
+
+    // Animasi loading hanya dipakai jika diaktifkan dan file GIF-nya tersedia.
+    public function getLoadingTampilAttribute(): bool
+    {
+        return (bool) $this->loading_aktif && filled($this->loading_gif);
+    }
+
+    public function getLoadingGifUrlAttribute(): ?string
+    {
+        return filled($this->loading_gif)
+            ? Storage::disk('public')->url($this->loading_gif)
+            : null;
+    }
+
+    // Durasi animasi loading dalam detik. Dibatasi 1–15 detik agar halaman
+    // tidak pernah tertahan terlalu lama karena salah isi.
+    public function getLoadingDurasiDetikAttribute(): int
+    {
+        return max(1, min(15, (int) ($this->loading_durasi ?? 2)));
     }
 }

@@ -15,6 +15,11 @@ class VideoYoutubeForm
         return $schema
             ->columns(1)
             ->components([
+                TextInput::make('judul')
+                    ->label('Judul video')
+                    ->helperText('Opsional. Tampil sebagai judul di daftar putar beranda.')
+                    ->maxLength(150),
+
                 TextInput::make('url')
                     ->label('Tautan video YouTube')
                     ->placeholder('https://www.youtube.com/watch?v=...')

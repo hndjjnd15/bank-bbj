@@ -10,26 +10,60 @@ class KantorCabangSeeder extends Seeder
 {
     public function run(): void
     {
-        // Semua data di bawah hanya CONTOH (alamat, telepon, dan WhatsApp placeholder).
-        // Ganti dengan data asli lewat /admin sebelum website tayang.
-        $dasar = [
-            'jam_operasional' => "Senin - Jumat: 08.00 - 16.00 WIB\nSabtu, Minggu, dan hari libur nasional: tutup",
-            'whatsapp' => '081234567890',
-            'diterbitkan' => true,
-        ];
-
+        $jamOperasional = null;
         $data = [
-            ['nama' => 'Kantor Pusat (Contoh)', 'tipe' => 'Kantor Pusat', 'kota' => 'Kabupaten Bogor', 'alamat' => 'Alamat contoh kantor pusat', 'telepon' => '(0251) 000000', 'urutan' => 1, 'foto_utama' => '/images/contoh/foto-1.svg'],
-            ['nama' => 'Cabang Parungpanjang (Contoh)', 'tipe' => 'Kantor Cabang', 'kota' => 'Parungpanjang', 'alamat' => 'Alamat contoh, Parungpanjang', 'telepon' => '(0251) 000001', 'urutan' => 1, 'foto_utama' => '/images/contoh/foto-2.svg'],
-            ['nama' => 'Cabang Leuwiliang (Contoh)', 'tipe' => 'Kantor Cabang', 'kota' => 'Leuwiliang', 'alamat' => 'Alamat contoh, Leuwiliang', 'telepon' => '(0251) 000002', 'urutan' => 2, 'foto_utama' => '/images/contoh/foto-3.svg'],
-            ['nama' => 'Cabang Sawangan (Contoh)', 'tipe' => 'Kantor Cabang', 'kota' => 'Sawangan', 'alamat' => 'Alamat contoh, Sawangan', 'telepon' => '(0251) 000003', 'urutan' => 3, 'foto_utama' => '/images/contoh/foto-1.svg'],
-            ['nama' => 'Cabang Citeureup (Contoh)', 'tipe' => 'Kantor Cabang', 'kota' => 'Citeureup', 'alamat' => 'Alamat contoh, Citeureup', 'telepon' => '(0251) 000004', 'urutan' => 4, 'foto_utama' => null],
+            [
+                'nama' => 'Kantor Pusat Parungpanjang',
+                'tipe' => 'Kantor Pusat',
+                'kota' => 'Kabupaten Bogor',
+                'alamat' => 'Jl. Mohamad Toha No. 80, Cibunar, Kec. Parung Panjang, Kabupaten Bogor, Jawa Barat 16360',
+                'telepon' => '(021) 5979127',
+                'whatsapp' => '6281110021707',
+                'email' => 'sobatcare@bprbogorjabar.co.id',
+                'link_maps' => 'https://maps.app.goo.gl/MDMi72DV8yWH6V7R9',
+            ],
+            [
+                'nama' => 'Kantor Cabang Leuwiliang',
+                'tipe' => 'Kantor Cabang',
+                'kota' => 'Kabupaten Bogor',
+                'alamat' => 'Jl. Raya Leuwiliang, Kp. Warnasari RT 001 RW 001, Desa Cibeber 1, Kecamatan Leuwiliang, Bogor 16640',
+                'telepon' => '(0251) 8640055',
+                'whatsapp' => '6281110022707',
+                'email' => 'bankbbjleuwiliang@gmail.com',
+                'link_maps' => 'https://maps.app.goo.gl/g3SiezRo2A7pX4MCA',
+            ],
+            [
+                'nama' => 'Kantor Cabang Sawangan',
+                'tipe' => 'Kantor Cabang',
+                'kota' => 'Kota Depok',
+                'alamat' => 'Jl. Abdul Wahab No. 6, Kecamatan Sawangan, Kota Depok',
+                'telepon' => '(0251) 8613792',
+                'whatsapp' => '6281110023707',
+                'email' => 'bankbbjsawangan@gmail.com',
+                'link_maps' => 'https://maps.app.goo.gl/g7dzMP2DTB6d8isc6',
+            ],
+            [
+                'nama' => 'Kantor Cabang Citeureup',
+                'tipe' => 'Kantor Cabang',
+                'kota' => 'Kabupaten Bogor',
+                'alamat' => 'Jl. Raya Alternatif Puspanegara No. 101, Kecamatan Citeureup, Kabupaten Bogor',
+                'telepon' => '(021) 87942230',
+                'whatsapp' => '6281110024707',
+                'email' => 'bankbbjciteureup@gmail.com',
+                'link_maps' => 'https://maps.app.goo.gl/o7w8wKF2C63ucDJH8',
+            ],
         ];
 
-        foreach ($data as $d) {
-            $row = array_merge($dasar, $d);
-            $row['slug'] = Str::slug($row['nama']);
-            KantorCabang::updateOrCreate(['slug' => $row['slug']], $row);
+        foreach ($data as $urutan => $kantor) {
+            $kantor['slug'] = Str::slug($kantor['nama']);
+            $kantor['jam_operasional'] = $jamOperasional;
+            $kantor['koordinat'] = null;
+            $kantor['foto_utama'] = null;
+            $kantor['galeri'] = null;
+            $kantor['urutan'] = $urutan + 1;
+            $kantor['diterbitkan'] = true;
+
+            KantorCabang::updateOrCreate(['slug' => $kantor['slug']], $kantor);
         }
     }
 }

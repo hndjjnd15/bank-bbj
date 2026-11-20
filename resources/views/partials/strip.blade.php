@@ -7,7 +7,7 @@
       <li class="strip__ok">Terdaftar OJK</li>
       <li class="strip__ok">Dijamin LPS</li>
       <li>Senin–Jumat 08.00–16.00 WIB</li>
-      <li><a href="tel:0254430000">(0254) 430000</a></li>
+      <li><a href="tel:0254430000">(021) 5979127</a></li>
       <li><a href="{{ $waSitus }}">WhatsApp</a></li>
     </ul>
   </div>

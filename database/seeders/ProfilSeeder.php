@@ -11,42 +11,38 @@ class ProfilSeeder extends Seeder
 {
     public function run(): void
     {
-        // Teks dan gambar di bawah hanya CONTOH. Ganti lewat /admin sebelum website tayang.
-        if (! ProfilPerusahaan::query()->exists()) {
-            ProfilPerusahaan::create([
-                'sejarah' => "Teks contoh. Tuliskan sejarah singkat perusahaan di panel admin.\n\nPisahkan paragraf dengan satu baris kosong.",
-                'foto_gedung' => '/images/contoh/foto-1.svg',
-                'visi' => 'Teks contoh visi perusahaan. Isi lewat panel admin.',
-                'misi' => "Teks contoh misi pertama\nTeks contoh misi kedua\nTeks contoh misi ketiga",
-                'foto_struktur' => '/images/contoh/struktur.svg',
-            ]);
-        }
+        ProfilPerusahaan::query()->firstOrCreate([], [
+            'sejarah' => "PT BPR Bogor Jabar (Perseroda), dikenal sebagai Bank BBJ, merupakan BPR milik Pemerintah Kabupaten Bogor, Pemerintah Provinsi Jawa Barat, dan PT Bank Pembangunan Daerah Jawa Barat dan Banten (Bank BJB). Bank BBJ mengusung nilai Amanah, Kuat, dan Peduli.\n\nPerusahaan berawal sebagai PD BPR LPK Parungpanjang pada 1 Juli 1972. Setelah memperoleh pengukuhan sebagai Bank Perkreditan Rakyat pada 1999, perusahaan mengalami perubahan nama dan penggabungan dengan BPR milik Pemerintah Kabupaten Bogor pada 2018. Berdasarkan Peraturan Daerah Provinsi Jawa Barat Nomor 6 Tahun 2021 dan Akta Nomor 32 Tahun 2023, badan hukum dan nama perusahaan menjadi PT BPR Bogor Jabar (Perseroda).\n\nBank BBJ berizin dan diawasi Otoritas Jasa Keuangan serta merupakan peserta penjaminan Lembaga Penjamin Simpanan.",
+            'foto_gedung' => null,
+            'visi' => 'Menjadi Bank Perekonomian Rakyat yang sehat dan terpercaya dalam mendukung pembangunan ekonomi masyarakat Jawa Barat.',
+            'misi' => "Mencetak karyawan yang handal dalam perbankan dan berkeadaban dalam pelayanan.\nMenciptakan produk perbankan yang variatif dan inovatif untuk kebutuhan usaha, konsumtif, dan investasi dengan memaksimalkan peran teknologi.\nMelaksanakan fungsi kepatuhan untuk meningkatkan efektivitas tata kelola BPR.\nBerkontribusi terhadap peningkatan pendapatan asli daerah dan membantu UMKM dalam meningkatkan perekonomian.",
+            'foto_struktur' => null,
+        ]);
 
-        // Struktur permodalan (data dari tabel yang diberikan). Persentase dihitung otomatis.
-        $saham = [
+        $pemegangSaham = [
             ['nama' => 'Pemda Provinsi Jawa Barat', 'modal_dasar' => 36720000000, 'modal_disetor' => 7000000000, 'urutan' => 1],
             ['nama' => 'Pemda Kabupaten Bogor', 'modal_dasar' => 20880000000, 'modal_disetor' => 9998500000, 'urutan' => 2],
             ['nama' => 'PT Bank BJB', 'modal_dasar' => 14400000000, 'modal_disetor' => 1590000000, 'urutan' => 3],
         ];
-        foreach ($saham as $s) {
-            PemegangSaham::updateOrCreate(['nama' => $s['nama']], $s);
+
+        foreach ($pemegangSaham as $pemegang) {
+            PemegangSaham::updateOrCreate(['nama' => $pemegang['nama']], $pemegang);
         }
 
-        // Pengurus CONTOH (nama, jabatan, dan riwayat adalah placeholder). Ganti lewat /admin.
-        $latar = "Teks contoh. Tuliskan riwayat karier dan pengalaman singkat pengurus di panel admin.";
-        $pendidikan = "S2 Manajemen, Universitas Contoh\nS1 Ekonomi, Universitas Contoh";
-
         $pengurus = [
-            ['jabatan' => 'Direktur Utama', 'kelompok' => 'direksi', 'nama' => 'Nama Direktur Utama, S.E., M.M.', 'urutan' => 1],
-            ['jabatan' => 'Direktur', 'kelompok' => 'direksi', 'nama' => 'Nama Direktur, S.E., M.M.', 'urutan' => 2],
-            ['jabatan' => 'Komisaris Utama', 'kelompok' => 'komisaris', 'nama' => 'Nama Komisaris Utama, S.H., M.H.', 'urutan' => 1],
-            ['jabatan' => 'Komisaris', 'kelompok' => 'komisaris', 'nama' => 'Nama Komisaris, S.T., M.M.', 'urutan' => 2],
+            ['nama' => 'M Roby Binarta', 'jabatan' => 'Direktur Utama', 'kelompok' => 'direksi', 'urutan' => 1],
+            ['nama' => 'Fasirun', 'jabatan' => 'Direktur', 'kelompok' => 'direksi', 'urutan' => 2],
+            ['nama' => 'Erwin Sugita', 'jabatan' => 'Komisaris Utama', 'kelompok' => 'komisaris', 'urutan' => 1],
         ];
-        foreach ($pengurus as $p) {
-            // Dicocokkan lewat jabatan + kelompok, jadi data contoh lama ikut diperbarui
+
+        foreach ($pengurus as $orang) {
             PengurusPerusahaan::updateOrCreate(
-                ['jabatan' => $p['jabatan'], 'kelompok' => $p['kelompok']],
-                $p + ['latar_belakang' => $latar, 'pendidikan' => $pendidikan, 'foto' => '/images/contoh/pengurus.svg']
+                ['jabatan' => $orang['jabatan'], 'kelompok' => $orang['kelompok']],
+                $orang + [
+                    'foto' => null,
+                    'latar_belakang' => null,
+                    'pendidikan' => null,
+                ],
             );
         }
     }

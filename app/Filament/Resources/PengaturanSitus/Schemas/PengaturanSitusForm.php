@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PengaturanSitus\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -39,6 +40,44 @@ class PengaturanSitusForm
                             ->rows(3)
                             ->maxLength(500)
                             ->helperText('Sudah terisi di aplikasi WhatsApp saat pengunjung menekan tombol. Kosongkan bila tidak perlu.')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Animasi Loading Halaman')
+                    ->description('Animasi GIF yang menutupi layar selama halaman sedang dimuat, misalnya saat pengunjung membuka halaman lain atau mengirim formulir.')
+                    ->columns(1)
+                    ->schema([
+                        Toggle::make('loading_aktif')
+                            ->label('Tampilkan animasi loading')
+                            ->helperText('Jika dimatikan, animasi tidak muncul sama sekali di website.')
+                            ->default(false)
+                            ->columnSpanFull(),
+
+                        FileUpload::make('loading_gif')
+                            ->label('File animasi (.gif)')
+                            ->helperText(
+                                'Format GIF animasi berulang. Disarankan 200 × 200 px dengan latar transparan, '.
+                                'animasi singkat, dan ukuran maksimal 2 MB agar halaman tetap cepat dibuka.'
+                            )
+                            ->image()
+                            ->imagePreviewHeight('120')
+                            ->acceptedFileTypes(['image/gif'])
+                            ->maxSize(2048)
+                            ->disk('public')
+                            ->directory('loading')
+                            ->visibility('public')
+                            ->required(fn (Get $get): bool => (bool) $get('loading_aktif'))
+                            ->columnSpanFull(),
+
+                        TextInput::make('loading_durasi')
+                            ->label('Durasi tampil (detik)')
+                            ->helperText('Lama animasi loading ditampilkan sebelum halaman dibuka. Isi 1–15 detik; bawaan 2 detik.')
+                            ->integer()
+                            ->minValue(1)
+                            ->maxValue(15)
+                            ->default(2)
+                            ->suffix('detik')
+                            ->required()
                             ->columnSpanFull(),
                     ]),
 

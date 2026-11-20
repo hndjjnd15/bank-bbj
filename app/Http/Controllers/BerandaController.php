@@ -6,6 +6,7 @@ use App\Models\BannerBeranda;
 use App\Models\Berita;
 use App\Models\Faq;
 use App\Models\Lelang;
+use App\Models\PopupPromo;
 use App\Models\ProdukBank;
 use App\Models\SukuBungaDeposito;
 use App\Models\VideoYoutube;
@@ -101,6 +102,16 @@ class BerandaController extends Controller
             ]]);
         }
 
+        // Pop-up promo: satu pop-up aktif dengan urutan terkecil.
+        // Jika tabel belum dipakai sama sekali, tampilkan gambar bawaan lama.
+        $popupPromo = null;
+        $popupDefault = true;
+
+        if (Schema::hasTable('popup_promos')) {
+            $popupPromo = PopupPromo::query()->tayang()->first();
+            $popupDefault = ! PopupPromo::query()->exists();
+        }
+
         return view('beranda', [
             'bannerSlides' => $bannerSlides,
             'layanan' => $layanan,
@@ -109,6 +120,8 @@ class BerandaController extends Controller
             'videoYoutube' => $videoYoutube,
             'berita' => $berita,
             'faq' => $faq,
+            'popupPromo' => $popupPromo,
+            'popupDefault' => $popupDefault,
         ]);
     }
 }

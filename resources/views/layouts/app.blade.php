@@ -10,11 +10,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+<noscript><style>.loading-halaman { display: none !important; }</style></noscript>
 @stack('styles')
 <link href="{{ asset('images/logo-bbj-1x1.ico') }}" rel="shortcut icon" type="image/x-icon">
 </head>
 <body>
 
+@include('partials.loading-halaman')
 @include('partials.strip')
 @include('partials.header')
 

@@ -20,13 +20,19 @@
   }
 
   pemicu.forEach(function (tombol) {
+    const item = tombol.parentElement;
+
     tombol.addEventListener("click", function (e) {
       e.stopPropagation();
+      // Di desktop dropdown sudah terbuka karena hover; klik pada tombolnya
+      // jangan langsung menutup (dulu terasa seperti menu "menghilang").
+      if (!mobile.matches && item.matches(":hover") && tombol.getAttribute("aria-expanded") === "true") return;
+
       const buka = tombol.getAttribute("aria-expanded") !== "true";
       tutupSemuaDropdown(tombol);
       setDropdown(tombol, buka);
     });
-    const item = tombol.parentElement;
+
     item.addEventListener("mouseenter", function () {
       if (!mobile.matches) { tutupSemuaDropdown(tombol); setDropdown(tombol, true); }
     });
@@ -49,8 +55,9 @@
     hamburger.setAttribute("aria-expanded", String(buka));
     hamburger.setAttribute("aria-label", buka ? "Tutup menu" : "Buka menu");
     if (buka) aturBawahNav();
-    document.body.style.overflow = buka ? "hidden" : "";
-    document.documentElement.classList.toggle("menu-buka", buka); // menyembunyikan tombol bantuan
+    // Kunci gulir lewat <html> (lihat html.menu-buka di style.css), bukan <body>:
+    // body yang di-overflow:hidden mematikan sticky navbar sehingga header hilang.
+    document.documentElement.classList.toggle("menu-buka", buka);
     if (!buka) tutupSemuaDropdown();
   }
   hamburger.addEventListener("click", function () {
@@ -1025,4 +1032,227 @@
 
   document.addEventListener("visibilitychange", jadwalkan);
   jadwalkan();
+})();
+
+/* ===== Daftar putar video YouTube beranda ===== */
+(function () {
+  const wadah = document.querySelector("[data-video-utama]");
+  if (!wadah) return;
+
+  const frame = wadah.querySelector("[data-video-frame]");
+  const kartu = Array.from(wadah.querySelectorAll("[data-video-item]"));
+  if (!frame || kartu.length === 0) return;
+
+  function putar(terpilih) {
+    if (terpilih.classList.contains("is-aktif")) return;
+
+    const sumber = terpilih.dataset.videoSrc;
+    if (!sumber) return;
+
+    try {
+      const tautan = new URL(sumber, window.location.origin);
+      tautan.searchParams.set("autoplay", "1");
+      tautan.searchParams.set("rel", "0");
+      frame.src = tautan.toString();
+    } catch (error) {
+      frame.src = sumber;
+    }
+
+    frame.title = terpilih.dataset.videoJudul || frame.title;
+
+    kartu.forEach(function (lain) {
+      const aktif = lain === terpilih;
+      lain.classList.toggle("is-aktif", aktif);
+
+      const tombol = lain.querySelector("[data-video-play]");
+      if (tombol) tombol.setAttribute("aria-pressed", aktif ? "true" : "false");
+    });
+  }
+
+  kartu.forEach(function (item) {
+    item.addEventListener("click", function (event) {
+      // Tautan YouTube tetap membuka tab baru, bukan mengganti pemutar.
+      if (event.target.closest && event.target.closest("a")) return;
+      putar(item);
+    });
+  });
+})();
+
+/* ===== Pop-up iklan promosi beranda ===== */
+(function () {
+  const popup = document.querySelector("[data-promo-popup]");
+  if (!popup) return;
+
+  const dialog = popup.querySelector("[data-promo-dialog]");
+  if (!dialog) return;
+
+  const tombolTutup = popup.querySelector("button[data-promo-tutup]");
+  const DURASI_TUTUP = 400; // samakan dengan durasi transisi di style.css
+  let fokusTerakhir = null;
+  let pewaktu = null;
+
+  function terbuka() { return popup.classList.contains("is-buka"); }
+
+  function buka() {
+    if (terbuka()) return;
+    window.clearTimeout(pewaktu);
+    fokusTerakhir = document.activeElement;
+    popup.hidden = false;
+    popup.setAttribute("aria-hidden", "false");
+    void popup.offsetWidth; // paksa reflow supaya animasi mulai dari kondisi tertutup
+    popup.classList.add("is-buka");
+    document.documentElement.classList.add("promo-terbuka");
+    if (tombolTutup) tombolTutup.focus({ preventScroll: true });
+  }
+
+  function tutup() {
+    if (!terbuka()) return;
+    popup.classList.remove("is-buka");
+    popup.setAttribute("aria-hidden", "true");
+    document.documentElement.classList.remove("promo-terbuka");
+    pewaktu = window.setTimeout(function () { popup.hidden = true; }, DURASI_TUTUP);
+    if (fokusTerakhir && typeof fokusTerakhir.focus === "function") {
+      fokusTerakhir.focus({ preventScroll: true });
+    }
+  }
+
+  popup.addEventListener("click", function (event) {
+    // Latar gelap dan tombol X menutup; klik pada gambar/tautan tetap jalan.
+    if (event.target === popup || (event.target.closest && event.target.closest("[data-promo-latar], [data-promo-tutup]"))) {
+      tutup();
+    }
+  });
+
+  // Fokus tetap di dalam dialog selama pop-up terbuka.
+  document.addEventListener("keydown", function (event) {
+    if (!terbuka()) return;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      tutup();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+
+    const fokusable = Array.from(dialog.querySelectorAll("a[href], button:not([disabled])"));
+    if (fokusable.length === 0) return;
+
+    const pertama = fokusable[0];
+    const terakhir = fokusable[fokusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === pertama) {
+      event.preventDefault();
+      terakhir.focus();
+    } else if (!event.shiftKey && document.activeElement === terakhir) {
+      event.preventDefault();
+      pertama.focus();
+    }
+  });
+
+  window.setTimeout(buka, 450);
+})();
+
+/* ===== Animasi loading halaman ===== */
+(function () {
+  const overlay = document.querySelector("[data-loading-halaman]");
+  if (!overlay) return;
+
+  const KUNCI_MULAI = "bbj-loading-mulai";
+  const MAKS_UMUR_MULAI = 30000; // abaikan penanda lama yang tertinggal (ms)
+  const durasi = Math.max(1, Math.min(15, Number(overlay.dataset.loadingDurasi) || 2)) * 1000;
+
+  let pewaktu;
+  let sedangPindah = false;
+
+  function tampilkan() {
+    window.clearTimeout(pewaktu);
+    overlay.classList.remove("is-tersembunyi");
+    document.documentElement.classList.add("halaman-memuat");
+  }
+
+  function sembunyikan() {
+    window.clearTimeout(pewaktu);
+    overlay.classList.add("is-tersembunyi");
+    document.documentElement.classList.remove("halaman-memuat");
+    sedangPindah = false;
+    try { sessionStorage.removeItem(KUNCI_MULAI); } catch (e) {}
+  }
+
+  function sembunyikanSetelah(jeda) {
+    window.clearTimeout(pewaktu);
+    pewaktu = window.setTimeout(sembunyikan, Math.max(0, jeda));
+  }
+
+  // Tampilkan overlay dulu, pastikan sudah dilukis, baru jalankan perpindahan
+  // halaman. Dengan begitu pengunjung melihat loading lebih dulu, sedangkan
+  // proses pindah halaman berjalan di belakangnya.
+  function mulaiNavigasi(aksi) {
+    if (sedangPindah) return;
+    sedangPindah = true;
+
+    try { sessionStorage.setItem(KUNCI_MULAI, String(Date.now())); } catch (e) {}
+    tampilkan();
+    // Pengaman bila navigasi batal: overlay tidak boleh menutupi layar selamanya.
+    pewaktu = window.setTimeout(sembunyikan, durasi + 5000);
+
+    window.requestAnimationFrame(function () {
+      window.setTimeout(aksi, 0);
+    });
+  }
+
+  // Saat halaman dibuka, overlay sudah terlihat dari awal (lihat style.css).
+  // Jika datang dari navigasi, tampilkan hanya selama sisa durasinya.
+  let mulai = 0;
+  try { mulai = Number(sessionStorage.getItem(KUNCI_MULAI)) || 0; } catch (e) {}
+  const berlalu = mulai > 0 ? Date.now() - mulai : Infinity;
+  const sisa = berlalu >= 0 && berlalu < MAKS_UMUR_MULAI ? durasi - berlalu : durasi;
+
+  tampilkan();
+  sembunyikanSetelah(sisa);
+
+  document.addEventListener("click", function (event) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    const tautan = event.target.closest && event.target.closest("a[href]");
+    if (!tautan) return;
+    if (tautan.target && tautan.target !== "_self") return;
+    if (tautan.hasAttribute("download")) return;
+    if (tautan.dataset.tanpaLoading !== undefined) return;
+
+    const alamat = tautan.getAttribute("href");
+    if (!alamat || alamat.startsWith("#")) return;
+
+    const url = new URL(tautan.href, window.location.href);
+    if (url.origin !== window.location.origin) return;
+    if (url.protocol !== "http:" && url.protocol !== "https:") return;
+    // Hanya pindah anchor di halaman yang sama: tidak perlu overlay.
+    if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return;
+
+    event.preventDefault();
+    mulaiNavigasi(function () {
+      window.location.assign(url.href);
+    });
+  });
+
+  document.addEventListener("submit", function (event) {
+    if (event.defaultPrevented) return;
+
+    const form = event.target;
+    if (!form || form.tagName !== "FORM") return;
+    if (form.target && form.target !== "_self") return;
+    if (form.dataset.tanpaLoading !== undefined) return;
+
+    event.preventDefault();
+    mulaiNavigasi(function () {
+      HTMLFormElement.prototype.submit.call(form);
+    });
+  });
+
+  // Tombol Back/Forward bisa memulihkan halaman dari cache tanpa memuat ulang,
+  // jadi jangan tampilkan animasi loading lagi.
+  window.addEventListener("pageshow", function (event) {
+    sedangPindah = false;
+    if (event.persisted) sembunyikan();
+  });
 })();

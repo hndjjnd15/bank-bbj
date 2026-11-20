@@ -15,11 +15,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::query()->firstOrCreate(['email' => 'sobatcare@bprbogorjabar.co.id'], [
+            'name' => 'sobatcare',
+            'password' => bcrypt('admin123'),
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            BeritaSeeder::class,
+            DokumenPpidSeeder::class,
+            KantorCabangSeeder::class,
+            KreditSeeder::class,
+            LaporanSeeder::class,
+            LelangSeeder::class,
+            LowonganSeeder::class,
+            PengaturanSitusSeeder::class,
+            ProdukDepositoSeeder::class,
+            ProdukTabunganSeeder::class,
+            ProfilSeeder::class,
+            ProgramCsrSeeder::class,
+            VideoYoutubeSeeder::class,
         ]);
     }
 }
